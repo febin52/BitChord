@@ -2110,17 +2110,13 @@ fun NowPlayingScreen(
                 // on either side — the pill just sits between the two icons.
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // Logs icon — only shown when the debug-log setting is on
-                    // (Advanced Options in Settings). Icon-only, no label.
                     if (showLyricsLogsEnabled) {
                         Box(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                .size(34.dp)
                                 .clip(CircleShape)
                                 .background(if (lyricsLogsOpen) Color.White.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.10f))
                                 .clickable(
@@ -2139,37 +2135,11 @@ fun NowPlayingScreen(
                                 modifier = Modifier.size(16.dp),
                             )
                         }
-                        Spacer(Modifier.width(8.dp))
                     }
-                    // Source credit pill — same style as original, but sits between
-                    // the two icon buttons and fills leftover horizontal space.
+                    Spacer(Modifier.weight(1f))
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(percent = 50))
-                            .background(Color.White.copy(alpha = 0.10f))
-                            .padding(horizontal = 18.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = when {
-                                lyricsSource != null -> stringResource(R.string.lyrics_by, lyricsSource.label)
-                                lyrics.isNullOrEmpty() -> stringResource(R.string.no_lyrics_found)
-                                else -> stringResource(R.string.lyrics_saved_with_download)
-                            },
-                            style = MaterialTheme.typography.labelLarge,
-                            color = Color.White.copy(alpha = 0.7f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            // Height from the row, width from the height: a
-                            // circle, not an oval, whatever the pill measures.
-                            .fillMaxHeight()
-                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                            .size(34.dp)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.10f))
                             .clickable(
