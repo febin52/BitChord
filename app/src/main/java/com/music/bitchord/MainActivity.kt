@@ -482,26 +482,6 @@ private fun BitChordApp(
     val homeRecentlyPlayedLoading by viewModel.homeRecentlyPlayedLoading.collectAsStateWithLifecycle()
 
     // The top bar's icon is the quiet, always-there nudge; this is the
-    // once-per-launch popup version of the same news. `updateDialogShown`
-    // rides out configuration changes on rememberSaveable so a rotation
-    // doesn't bring it back — only a fresh launch does.
-    var updateDialogShown by rememberSaveable { mutableStateOf(false) }
-    var showUpdateDialog by remember { mutableStateOf(false) }
-    val updateAvailable by viewModel.updateAvailable.collectAsStateWithLifecycle()
-
-    /**
-     * The single gate both surfaces read, so the icon can't announce the update
-     * a beat before the popup does — they're one piece of news, and staggering
-     * them made the top bar look like it had caught something the app hadn't.
-     */
-    val updateNotice = updateAvailable
-
-    LaunchedEffect(updateNotice) {
-        if (updateNotice != null && !updateDialogShown) {
-            updateDialogShown = true
-            showUpdateDialog = true
-        }
-    }
     val query by viewModel.query.collectAsStateWithLifecycle()
     val results by viewModel.results.collectAsStateWithLifecycle()
     val exploreState by viewModel.explore.collectAsStateWithLifecycle()
@@ -1647,7 +1627,6 @@ private fun BitChordApp(
         ) {
             selectedTab = TAB_HOME
         }
-        BackHandler(enabled = showUpdateDialog) { showUpdateDialog = false }
         BackHandler(enabled = showListenBrainzLogin) { showListenBrainzLogin = false }
         BackHandler(enabled = showLastfmLogin) { showLastfmLogin = false }
         BackHandler(enabled = discordDialog != null) { discordDialog = null }
@@ -2248,24 +2227,6 @@ private fun BitChordApp(
                     },
                     modifier = Modifier.align(Alignment.TopCenter),
                     actions = {
-                        // Only worth surfacing where there's room for it and it won't
-                        // be mistaken for a per-page action — Home, at rest.
-                        if (!showSettings && !showAccountScrobbling && !showSources && detail == null && selectedTab == TAB_HOME) {
-                            updateNotice?.let { update ->
-                                IconButton(onClick = { showUpdateDialog = true }) {
-                                    Icon(
-                                        // An arrow rising out of a bar, not the
-                                        // little phone-with-an-arrow: at 24dp the
-                                        // handset outline is mush, and the glyph
-                                        // has to read as "newer version" rather
-                                        // than as "something about your device".
-                                        Icons.Rounded.Upgrade,
-                                        contentDescription = stringResource(R.string.update_available, update.version),
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                }
-                            }
-                        }
                         if (!showSettings && !showAccountScrobbling) {
                             // Left of the account photo, and only on Library itself:
                             // a history is a record of what was played, which reads
@@ -3021,41 +2982,6 @@ private fun BitChordApp(
                         },
                     )
                 }
-            }
-        }
-
-        // ---- Update available (once per launch) ----
-        if (showUpdateDialog) {
-            updateNotice?.let { update ->
-                UpdateAvailableDialog(
-                    version = update.version,
-                    notes = update.notes,
-                    hazeState = hazeState,
-                    // A download in progress keeps running behind the closed
-                    // sheet — only the sheet itself goes away. The top bar's
-                    // update icon reopens it onto whatever state it reached.
-                    onDismiss = { showUpdateDialog = false },
-                    onDownload = {
-                        if (update.apkUrl != null) {
-                            scope.launch { AppUpdateChecker.downloadApk(context) }
-                        } else {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(update.releaseUrl)))
-                            showUpdateDialog = false
-                        }
-                    },
-                    onCancelDownload = {
-                        AppUpdateChecker.cancelDownload()
-                    },
-                    onInstall = {
-                        val ready = AppUpdateChecker.download.value as? AppUpdateChecker.DownloadState.Ready
-                        ready?.let { AppUpdateChecker.installApk(context, it.file) }
-                    },
-                    onOpenReleasePage = {
-                        AppUpdateChecker.resetDownload()
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(update.releaseUrl)))
-                        showUpdateDialog = false
-                    },
-                )
             }
         }
 
