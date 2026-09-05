@@ -1803,21 +1803,7 @@ fun NowPlayingScreen(
                     }
                 }
 
-                // Video uploads begin as their own audio, immediately. This
-                // frosted, pill-shaped control is the one explicit opt-in to a
-                // catalogue match; after a successful swap it becomes Revert
-                // so a bad match is one tap away from the original upload.
-                if ((song.isVideo || isAudioVersion) && !lyricsOpen && p < 0.5f) {
-                    VideoAudioVersionButton(
-                        audioVersion = isAudioVersion,
-                        loading = audioVersionSwitching,
-                        onClick = onToggleAudioVersion,
-                        hazeState = playerHaze,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = artTop - 20.dp),
-                    )
-                }
+
 
                 // Sits in the gap under the sleeve, clear of its rounded
                 // corners and shadow — no box, no clip, nothing for the art
