@@ -971,8 +971,8 @@ fun NowPlayingScreen(
     // full-bleed at once. Keyed on the cover there is nothing to reset: the
     // bitmap really is still loaded, so the state stays true and the two
     // layers go on trading places as they should.
-    val artUrl = song.artworkAt(ART_PX)
-    var artLoaded by remember(artUrl) { mutableStateOf(false) }
+    val artUrl = song.artworkAt(ART_PX) ?: song.thumbnailUrl
+    var artLoaded by remember(artUrl, song.thumbnailUrl) { mutableStateOf(false) }
     /**
      * Which go at this cover we are on, and the reason there is more than one.
      *
@@ -987,7 +987,7 @@ fun NowPlayingScreen(
      * is no network at all, and a retry per recomposition — which is what an
      * unremembered request effectively gave — is a spin, not a recovery.
      */
-    var artAttempt by remember(artUrl) { mutableIntStateOf(0) }
+    var artAttempt by remember(artUrl, song.thumbnailUrl) { mutableIntStateOf(0) }
     /**
      * The one request for this cover, built once.
      *
@@ -1006,9 +1006,14 @@ fun NowPlayingScreen(
      * Remembered on the cover and the attempt, so it changes when the picture
      * changes and when a retry is deliberately asked for, and at no other time.
      */
-    val artRequest = remember(artUrl, artAttempt) {
+    val artRequest = remember(artUrl, song.thumbnailUrl, artAttempt) {
+        val targetData = when (artAttempt) {
+            0 -> artUrl ?: song.thumbnailUrl
+            1 -> song.artworkAt(544) ?: song.thumbnailUrl ?: artUrl
+            else -> song.thumbnailUrl ?: artUrl
+        }
         ImageRequest.Builder(context)
-            .data(artUrl)
+            .data(targetData)
             .size(ART_PX)
             // What makes a retry a new request as far as Coil's model comparison
             // is concerned. Only from the second go onwards, so the ordinary
@@ -1018,12 +1023,12 @@ fun NowPlayingScreen(
             .apply { if (artAttempt > 0) memoryCacheKeyExtra("attempt", artAttempt.toString()) }
             .build()
     }
-    var artFailed by remember(artUrl) { mutableStateOf(false) }
-    LaunchedEffect(artUrl, artFailed) {
+    var artFailed by remember(artUrl, song.thumbnailUrl) { mutableStateOf(false) }
+    LaunchedEffect(artUrl, song.thumbnailUrl, artFailed) {
         // A track with no artwork at all fails immediately and would fail
         // identically three more times: there is no request to make, so there is
         // nothing a second go could do differently.
-        if (artUrl == null || !artFailed || artAttempt >= ART_RETRIES) return@LaunchedEffect
+        if ((artUrl == null && song.thumbnailUrl == null) || !artFailed || artAttempt >= ART_RETRIES) return@LaunchedEffect
         delay(ART_RETRY_DELAY_MS)
         artFailed = false
         artAttempt++
