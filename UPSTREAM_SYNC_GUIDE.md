@@ -67,10 +67,13 @@ When resolving conflicts or reviewing merges, ensure these exact components rema
 - **Dimensions**: Glyph size `30.dp`, button spacing `2.dp`.
 
 ### F. Now Playing Screen
-- **File**: `app/src/main/java/com/music/bitchord/ui/player/NowPlayingScreen.kt`
-- **Top Bar**: Drag handle pill removed (clean strip).
+- **File**: `app/src/main/java/com/music/bitchord/ui/player/NowPlayingScreen.kt` & `ArtworkMeshBackdrop.kt`
+- **Top Bar**: Drag handle pill and Video/Audio switch pill removed (clean strip).
 - **Loader**: Circular progress spinner set to `34.dp` (stroke `2.5.dp`) inside fixed `74.dp` Box (`62.dp + 12.dp` matching the play button footprint so the progress bar never jumps).
-- **Seekbar**: No "Lossless", "High Quality", or "Upgrading Quality" badges underneath the progress bar — only the timestamps.
+- **Seekbar**: Clean layout with timestamps only (no quality / lossless badges under the bar).
+- **Lyrics Header**: Close button (`✕`) centered horizontally in the header (no "Lyrics by..." pill).
+- **Backdrop**: Subtle, dark ambient glow (`50%` mesh alpha with `35%-65%` dark gradient scrim).
+- **Animations**: Fluid spring physics (`dampingRatio = 0.78f-0.80f`, `stiffness = Spring.StiffnessMediumLow`) for opening expansion and lyrics sleeve morphing.
 
 ### G. In-App Updates Disabled
 - **Files**: `MainActivity.kt` and `MainViewModel.kt`
