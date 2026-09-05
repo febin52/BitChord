@@ -8,7 +8,7 @@ This document is a step-by-step instruction protocol for developers and AI agent
 
 | Remote Name | Repository URL | Purpose |
 | :--- | :--- | :--- |
-| **`origin`** | `https://github.com/febin-keystride/BitChord.git` | Your personal fork & Apple Music Edition repository |
+| **`origin`** | `https://github.com/febin52/BitChord.git` | Your personal fork & Apple Music Edition repository |
 | **`upstream`** | `https://github.com/kushagrasinghx/BitChord.git` | Official BitChord open-source repository |
 
 ### Ensure Remotes are Configured
@@ -137,5 +137,5 @@ gh release create <NEW_TAG> \
   app/build/outputs/apk/prod/release/app-prod-universal-release.apk \
   --title "BitChord <NEW_TAG> (Apple Music Edition)" \
   --notes "Merged upstream updates with Apple Music UI enhancements." \
-  -R febin-keystride/BitChord
+  -R febin52/BitChord
 ```
