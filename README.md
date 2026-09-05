@@ -84,7 +84,7 @@
 
 <h1><a id="download"></a>Download</h1>
 
-Grab the latest signed APK from the [Releases](https://github.com/kushagrasinghx/BitChord/releases) page. Sideloading requires enabling "Install unknown apps" for whichever app you download it with.
+Grab the latest signed APK from the [Releases](https://github.com/febin-keystride/BitChord/releases) page. Sideloading requires enabling "Install unknown apps" for whichever app you download it with.
 
 </div>
 
