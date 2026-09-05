@@ -258,20 +258,17 @@ fun ArtworkMeshBackdrop(
             .then(if (canBlur) Modifier.blur(blurRadius) else Modifier),
     ) {
         val seamY = seam.toPx().coerceIn(0f, size.height)
-        shown?.let { drawMesh(it, seamY, alpha = 1f) }
+        shown?.let { drawMesh(it, seamY, alpha = 0.50f) }
         // Read here rather than in composition: an Animatable read inside a
         // draw lambda invalidates the drawing and leaves composition out of it.
-        incoming?.let { drawMesh(it, seamY, alpha = fade.value) }
+        incoming?.let { drawMesh(it, seamY, alpha = fade.value * 0.50f) }
 
-        // Enough of a scrim to keep white text off a bright sleeve, and no
-        // more. The old backdrop needed a heavier one because it lightened
-        // every colour it drew to a fixed band; these are the sleeve's own,
-        // and a sleeve that ends dark should leave a dark screen.
+        // Subtle dark scrim over the ambient mesh to give that clean Apple Music glow
         drawRect(
             brush = Brush.verticalGradient(
                 colors = listOf(
-                    Color.Black.copy(alpha = 0.06f),
-                    Color.Black.copy(alpha = 0.30f),
+                    Color.Black.copy(alpha = 0.35f),
+                    Color.Black.copy(alpha = 0.65f),
                 ),
             ),
         )
