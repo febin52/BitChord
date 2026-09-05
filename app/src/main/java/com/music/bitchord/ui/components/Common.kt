@@ -80,15 +80,14 @@ fun Modifier.thumbnailBorder(shape: Shape): Modifier = composed {
 /**
  * The left and right inset every page's content sits at.
  *
- * It is the same inset the mini player and the tab bar float at, so the edge of
- * a track row, a card or a heading lines up with the edge of the bars stacked
- * below them rather than stepping in from them. One constant, shared by the
- * bars and the pages, is what keeps that true.
+ * Apple Music uses 16dp as its standard content margin — the same inset
+ * the mini player and the tab bar float at, so the edge of a track row,
+ * a card or a heading lines up with the bars below.
  */
-val PAGE_GUTTER = 10.dp
+val PAGE_GUTTER = 16.dp
 
-/** Where a divider under a track row starts: clear of the 52dp of artwork. */
-val ROW_DIVIDER_INSET = PAGE_GUTTER + 68.dp
+/** Where a divider under a track row starts: clear of the 52dp of artwork and 12dp gap. */
+val ROW_DIVIDER_INSET = PAGE_GUTTER + 64.dp
 
 /**
  * How wide the floating bars at the foot of the page — the tab bar and the mini
@@ -387,7 +386,7 @@ private fun SongRowContent(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             )
         }
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 text = song.title,

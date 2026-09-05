@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
@@ -69,6 +70,12 @@ import com.music.bitchord.ui.components.thumbnailBorder
 import com.music.bitchord.ui.player.MeshGradientBackground
 import com.music.bitchord.ui.player.MeshPalette
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.ui.unit.Dp
+import com.music.bitchord.data.model.Account
+import com.music.bitchord.ui.components.thumbnailBorder
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -81,9 +88,11 @@ fun HomeScreen(
     pullState: PullToRefreshState,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
-    title: String = "Listen Now",
+    title: String = "Home",
     signedIn: Boolean = true,
     onSignIn: (() -> Unit)? = null,
+    account: Account? = null,
+    onOpenAccount: (() -> Unit)? = null,
     /**
      * Holding a card rather than tapping it — the album/playlist menu. Only the
      * cards that point at a collection have one; a card that is a single track
@@ -106,12 +115,32 @@ fun HomeScreen(
             contentPadding = contentPadding,
         ) {
             item {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = PAGE_GUTTER, end = PAGE_GUTTER, top = 8.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    if (onOpenAccount != null) {
+                        ProfileAvatar(
+                            account = account,
+                            onClick = onOpenAccount,
+                            size = 36.dp,
+                        )
+                    }
+                }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                    modifier = Modifier.padding(horizontal = PAGE_GUTTER),
                 )
+                Spacer(Modifier.height(8.dp))
             }
             if (!signedIn && onSignIn != null) {
                 item {
@@ -180,7 +209,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedShelves(
 internal fun SectionHeader(title: String, subtitle: String = "", onShowAll: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
-            .padding(horizontal = PAGE_GUTTER, vertical = 10.dp)
+            .padding(start = PAGE_GUTTER, end = PAGE_GUTTER, top = 8.dp, bottom = 12.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -193,9 +222,10 @@ internal fun SectionHeader(title: String, subtitle: String = "", onShowAll: (() 
                 overflow = TextOverflow.Ellipsis,
             )
             if (subtitle.isNotBlank()) {
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -221,7 +251,7 @@ private fun HeroShelf(
     onItemClick: (ShelfItem) -> Unit,
     onItemLongPress: ((ShelfItem) -> Unit)? = null,
 ) {
-    Column(Modifier.padding(bottom = 26.dp)) {
+    Column(Modifier.padding(bottom = 28.dp)) {
         SectionHeader(shelf.title, shelf.subtitle)
         // Measured rather than taken as a share of the parent, because the card
         // has a ceiling as well as a fraction — see [heroCardWidth]. A fixed
@@ -289,6 +319,7 @@ private fun HeroCard(
                 overflow = TextOverflow.Ellipsis,
             )
             if (item.subtitle.isNotBlank()) {
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
@@ -316,7 +347,7 @@ internal fun Shelf(
     onItemLongPress: ((ShelfItem) -> Unit)? = null,
     leadingCard: (@Composable () -> Unit)? = null,
 ) {
-    Column(Modifier.padding(bottom = 26.dp)) {
+    Column(Modifier.padding(bottom = 28.dp)) {
         SectionHeader(shelf.title, shelf.subtitle)
         LazyRow(
             contentPadding = PaddingValues(horizontal = PAGE_GUTTER),
@@ -373,13 +404,16 @@ internal fun NewShelfCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        if (subtitle.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
@@ -480,12 +514,54 @@ internal fun ShelfCard(
                 modifier = Modifier.weight(1f, fill = false),
             )
         }
-        Text(
-            text = item.subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        if (item.subtitle.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = item.subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileAvatar(
+    account: Account?,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    size: Dp = 36.dp,
+) {
+    val photo = account?.thumbnailUrl
+    if (photo != null) {
+        AsyncImage(
+            model = photo,
+            contentDescription = stringResource(R.string.settings),
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+                .size(size)
+                .clip(CircleShape)
+                .thumbnailBorder(CircleShape)
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         )
+    } else {
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .thumbnailBorder(CircleShape)
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Rounded.Person,
+                contentDescription = stringResource(R.string.settings),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size((size.value * 0.6f).dp),
+            )
+        }
     }
 }

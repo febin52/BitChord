@@ -129,9 +129,9 @@ fun SourcesScreen(
                 append(
                     "A source that doesn't have the track, or can't be reached, is " +
                         "stepped over rather than failing playback — the next one down plays it " +
-                        "instead. Anything ranked above YouTube is offered a YouTube track's " +
+                        "instead. Anything ranked above Apple Music is offered the track's " +
                         "recording first, and keeps it if what it returns is better than what " +
-                        "YouTube would have served.",
+                        "Apple Music would have served.",
                 )
                 if (cappedByQuality) {
                     append(

@@ -35,16 +35,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.music.bitchord.BuildConfig
@@ -60,7 +61,7 @@ import com.music.bitchord.data.settings.AppSettings
  * ramp, fixed headers that sit directly beneath it — measures from here rather
  * than from a copy of the number.
  */
-val TopBarContentHeight = 52.dp
+val TopBarContentHeight: Dp = 48.dp
 
 /**
  * The breathing room between the bar's bottom edge and the first thing under
@@ -71,13 +72,6 @@ val TopBarContentGap = 12.dp
 /**
  * How far down the window the bar actually ends: the status bar inset it is
  * pinned under, plus its own height.
- *
- * This has to be read at composition rather than baked in as a constant — the
- * inset is a property of the device and of the window, not of the app. A phone
- * with a cutout, one without, and a freeform window with no status bar at all
- * are all different numbers, and a fixed guess is wrong on all but one of them:
- * too tight and content is clipped under the bar, too loose and every page
- * opens on a band of empty space.
  */
 @Composable
 fun topBarHeight(): Dp =
@@ -103,7 +97,7 @@ fun topBarContentPadding(): Dp = topBarHeight() + TopBarContentGap
  * unreadable, so something has to carry it.
  *
  * Apple Music behaviour: the big in-list header owns the title at rest;
- * once the list scrolls, the small centered title fades in.
+ * once the list scrolls, the small title fades in.
  */
 @Composable
 fun FrostedTopBar(
@@ -128,7 +122,7 @@ fun FrostedTopBar(
     // the fade exists to remove.
     val dividerColor by animateColorAsState(
         targetValue = MaterialTheme.colorScheme.outline.copy(
-            alpha = if (scrolled && reduceDynamicBlur) 0.6f else 0f,
+            alpha = if (scrolled) 0.45f else 0f,
         ),
         animationSpec = tween(220),
         label = "topBarDivider",
@@ -138,7 +132,7 @@ fun FrostedTopBar(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                if (reduceDynamicBlur) Modifier.background(MaterialTheme.colorScheme.surface)
+                if (scrolled || reduceDynamicBlur) Modifier.background(MaterialTheme.colorScheme.background)
                 else Modifier,
             ),
     ) {
@@ -150,16 +144,20 @@ fun FrostedTopBar(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    // Reserve room for the back button and the actions so a
-                    // long title truncates instead of running under them.
-                    .padding(horizontal = 96.dp)
+                    .align(Alignment.CenterStart)
+                    .padding(
+                        start = if (onBack != null) 56.dp else 16.dp,
+                        end = 72.dp,
+                    )
                     .fillMaxWidth()
                     .graphicsLayer { alpha = titleAlpha },
             )
@@ -173,34 +171,8 @@ fun FrostedTopBar(
                     Icon(
                         Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_logo),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                        modifier = Modifier.height(18.dp),
-                    )
-                    // The dev flavor gets its own applicationId so it can sit
-                    // installed next to the prod build; this badge is the
-                    // in-app equivalent, so the two are never mixed up at a
-                    // glance once both are running.
-                    if (BuildConfig.FLAVOR == "dev") {
-                        Text(
-                            text = "Dev",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 6.dp),
-                        )
-                    }
                 }
             }
             Row(
@@ -269,7 +241,7 @@ fun TopBarAccountButton(
                     Icons.Rounded.Person,
                     contentDescription = stringResource(R.string.settings),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(22.dp),
                 )
             }
         }
@@ -319,10 +291,4 @@ private fun RefreshLine(refreshing: Boolean, pullFraction: () -> Float, modifier
 
 private val LINE_HEIGHT = 2.5.dp
 
-/**
- * The account photo's diameter.
- *
- * Smaller than an icon's 24dp box: a filled circle carries more weight than a
- * glyph does, and at 24 it sat heavier in the bar than the wordmark opposite it.
- */
-private val AVATAR_SIZE = 28.dp
+private val AVATAR_SIZE = 36.dp

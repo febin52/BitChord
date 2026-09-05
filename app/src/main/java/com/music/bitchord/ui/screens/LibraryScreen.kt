@@ -35,9 +35,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.annotation.DrawableRes
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.music.bitchord.data.YtMusicRepository
 import com.music.bitchord.data.model.HomeShelf
@@ -140,12 +153,54 @@ fun LibraryScreen(
             contentPadding = contentPadding,
         ) {
             item {
-                Text(
-                    text = stringResource(R.string.library),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = PAGE_GUTTER, end = PAGE_GUTTER, top = 8.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(R.string.library),
+                        style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = "Edit",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(percent = 50))
+                            .clickable { }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                    modifier = Modifier.padding(horizontal = PAGE_GUTTER),
                 )
+            }
+            item {
+                Column(Modifier.fillMaxWidth()) {
+                    LibraryCategoryRow("Playlists", R.drawable.ic_library_playlists) {
+                        (state as? UiState.Success)?.data?.shelves?.firstOrNull { it.title == PLAYLISTS }?.let { onShowAll(it) }
+                    }
+                    LibraryCategoryRow("Artists", R.drawable.ic_library_artists) {
+                        (state as? UiState.Success)?.data?.shelves?.firstOrNull { it.title == "Artists" }?.let { onShowAll(it) }
+                    }
+                    LibraryCategoryRow("Albums", R.drawable.ic_library_albums) {
+                        (state as? UiState.Success)?.data?.shelves?.firstOrNull { it.title == "Albums" }?.let { onShowAll(it) }
+                    }
+                    LibraryCategoryRow("Songs", R.drawable.ic_library_songs) {
+                        onShelfItemClick(ShelfItem(title = "Songs", subtitle = "", thumbnailUrl = null, videoId = null, browseId = "local:all"))
+                    }
+                    LibraryCategoryRow("Downloaded", R.drawable.ic_library_downloaded) {
+                        onShelfItemClick(ShelfItem(title = "Downloads", subtitle = "", thumbnailUrl = null, videoId = null, browseId = "local:downloads"))
+                    }
+                    LibraryCategoryRow("TV & Movies", R.drawable.ic_library_tv, isLast = true) { }
+                }
+                Spacer(Modifier.height(14.dp))
             }
             // Drawn whether or not anything has been played: with nothing behind
             // it the page still has to say the feature exists, or the only way
@@ -197,8 +252,8 @@ fun LibraryScreen(
             if (!signedIn) {
                 item {
                     MessageState(
-                        message = "Sign in to your Google account to see your YouTube Music " +
-                            "liked songs, playlists and history.",
+                        message = "Sign in to your account to see your Apple Music " +
+                            "favorite songs, playlists and history.",
                         actionLabel = "Sign in",
                         onAction = onSignIn,
                     )
@@ -506,3 +561,44 @@ private fun HomeShelf.pinnedFirst(pinned: List<String>): HomeShelf {
 /** The library feed whose cards are the account's own — see [PlaylistShelf]. */
 private const val PLAYLISTS = YtMusicRepository.PLAYLISTS_SHELF
 private const val ON_DEVICE = "On Device"
+
+@Composable
+private fun LibraryCategoryRow(
+    title: String,
+    @DrawableRes iconRes: Int,
+    isLast: Boolean = false,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = PAGE_GUTTER, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(28.dp),
+        )
+        Spacer(Modifier.width(18.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontSize = 23.sp,
+                fontWeight = FontWeight.Normal,
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = if (isLast) PAGE_GUTTER else PAGE_GUTTER + 48.dp,
+            end = if (isLast) PAGE_GUTTER else 0.dp,
+        ),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+    )
+}

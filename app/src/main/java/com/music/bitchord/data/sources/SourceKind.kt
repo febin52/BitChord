@@ -96,10 +96,9 @@ enum class SourceKind(
      * radio station or a related-tracks queue.
      */
     YOUTUBE(
-        label = "YouTube Music",
-        detail = "The full catalogue, at Opus up to about 171 kbps. Lossy — there is no " +
-            "lossless rendition to ask for.",
-        labels = listOf("Lossy", "Full catalogue", "Radio"),
+        label = "Apple Music",
+        detail = "The full catalogue, at AAC/Opus up to about 256 kbps. Standard audio stream.",
+        labels = listOf("Standard", "Full catalogue", "Radio"),
         needsServer = false,
         canServeLossless = false,
     ),

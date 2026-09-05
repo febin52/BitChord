@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,7 @@ import dev.chrisbanes.haze.materials.HazeMaterials
  * The transport buttons' touch target. Material's default 48dp is what a bar
  * this slim is really made of, so it sets the height on its own.
  */
-private val GLYPH_SLOT = 40.dp
+private val GLYPH_SLOT = 44.dp
 
 /**
  * The play and skip glyphs themselves.
@@ -58,7 +60,7 @@ private val GLYPH_SLOT = 40.dp
  * taller, which is not what a bigger glyph is being asked for. At 32 there is
  * still 4dp of clearance to the slot's edge on every side.
  */
-private val GLYPH_SIZE = 32.dp
+private val GLYPH_SIZE = 26.dp
 
 /** The spinner that stands in for the play glyph, kept in proportion to it. */
 private val SPINNER_SIZE = 22.dp
@@ -93,7 +95,7 @@ private val ROW_PADDING_VERTICAL = 8.dp
  * vertical figure would leave the artwork touching the curve; 12 clears it
  * with room, and reads as centred rather than jammed into the round.
  */
-private val ROW_PADDING_HORIZONTAL = 12.dp
+private val ROW_PADDING_HORIZONTAL = 16.dp
 
 /**
  * The artwork's corner, on the 8dp every other thumbnail in the app carries.
@@ -103,9 +105,9 @@ private val ROW_PADDING_HORIZONTAL = 12.dp
  * height happens to be — so that constraint is gone and the artwork can go
  * back to matching [SongRow].
  */
-private val ART_CORNER = 8.dp
+private val ART_CORNER = 6.dp
 
-/** Frosted mini player that rides just above the floating tab bar. */
+/** Docked mini player that sits directly above the bottom navigation bar. */
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun MiniPlayer(
@@ -116,32 +118,30 @@ fun MiniPlayer(
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onExpand: () -> Unit,
+    positionMs: Long = 0L,
+    durationMs: Long = 0L,
     modifier: Modifier = Modifier,
 ) {
     val reduceDynamicBlur by AppSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
     val haptics = rememberHaptics()
-    // percent rather than a dp figure, so the corner stays exactly half the
-    // height if the row's contents ever change it — which is what keeps a pill
-    // a pill instead of a rounded rectangle. Same idiom as [FloatingBottomBar]
-    // directly below it, so the two shapes are the same family.
-    val shape = RoundedCornerShape(percent = 50)
     Box(
         modifier = modifier
-            .padding(horizontal = PAGE_GUTTER)
-            .clip(shape)
+            .fillMaxWidth()
             .then(
                 if (reduceDynamicBlur) {
-                    Modifier.background(MaterialTheme.colorScheme.surface)
+                    Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                 } else {
-                    Modifier.hazeEffect(state = hazeState, style = HazeMaterials.thin(MaterialTheme.colorScheme.surface))
+                    Modifier.hazeEffect(state = hazeState, style = HazeMaterials.thin(MaterialTheme.colorScheme.surfaceVariant))
                 },
             )
-            .border(0.5.dp, Color.White.copy(alpha = 0.10f), shape)
-            // Deliberately silent: the whole bar is the target, so it catches
-            // stray taps meant for the page behind it, and the sheet rising is
-            // its own confirmation. The glyphs on it still buzz.
             .clickable(onClick = onExpand),
     ) {
+        // Top hairline divider
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f),
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,6 +169,7 @@ fun MiniPlayer(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = song.artist,
                     style = MaterialTheme.typography.bodyMedium,

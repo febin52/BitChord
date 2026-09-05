@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BitChord</string>
+    <string name="app_name">Apple Music</string>
     <string name="playback_channel_name">Now playing</string>
     <string name="download_channel_name">Downloads</string>
     <string name="download_channel_description">Songs being saved to your Music folder</string>
@@ -24,7 +24,7 @@
     <string name="on_device">On Device</string>
     <string name="playlists">Playlists</string>
     <string name="new_playlist">New playlist</string>
-    <string name="saved_to_youtube_music">Saved to YouTube Music</string>
+    <string name="saved_to_youtube_music">Saved to Apple Music</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">Sign out</string>
     <string name="signed_in">Signed in</string>
@@ -55,7 +55,7 @@
     <string name="artists">Artists</string>
     <string name="albums">Albums</string>
     <string name="no_album_metadata">None of these tracks say what album they are from.</string>
-    <string name="search_empty">Search millions of songs on YouTube Music.</string>
+    <string name="search_empty">Search millions of songs on Apple Music.</string>
     <string name="recent_searches">Recent searches</string>
     <string name="clear">Clear</string>
     <string name="search_hint">Artists, Songs, Lyrics and More</string>
@@ -97,10 +97,10 @@
     <string name="dolby_atmos_open_failed">Couldn’t open Dolby Atmos settings</string>
     <string name="update_available">Update available: v%1$s</string>
     <string name="software_update">Software Update</string>
-    <string name="update_available_body">bitchord %1$s is available to download.</string>
-    <string name="update_downloading_body">Downloading bitchord %1$s…</string>
-    <string name="update_ready_body">bitchord %1$s is ready to install.</string>
-    <string name="update_failed_body">Couldn’t download bitchord %1$s.</string>
+    <string name="update_available_body">Apple Music %1$s is available to download.</string>
+    <string name="update_downloading_body">Downloading Apple Music %1$s…</string>
+    <string name="update_ready_body">Apple Music %1$s is ready to install.</string>
+    <string name="update_failed_body">Couldn’t download Apple Music %1$s.</string>
     <string name="download_now">Download Now</string>
     <string name="install_now">Install Now</string>
     <string name="later">Later</string>
@@ -109,7 +109,7 @@
     <string name="open_releases_page">Open Releases Page</string>
     <string name="whats_new">What’s new</string>
     <string name="log_copied">Log copied · %1$d lines</string>
-    <string name="sign_in_youtube_music">Sign in to YouTube Music</string>
+    <string name="sign_in_youtube_music">Sign in to Apple Music</string>
     <string name="sign_in_discord">Sign in to Discord</string>
     <string name="personalized_recommendations">Get personalized recommendations for you</string>
     <string name="play_next">Play next</string>
@@ -128,7 +128,7 @@
     <string name="widget_previous">Previous</string>
     <string name="widget_artwork">Album art</string>
     <string name="widget_nothing_played">Nothing played yet</string>
-    <string name="widget_open_bitchord">Open BitChord</string>
+    <string name="widget_open_bitchord">Open Apple Music</string>
     <string name="widget_preview_title">Song title</string>
     <string name="widget_preview_artist">Artist</string>
     <string name="download_quality">Download quality</string>
@@ -153,7 +153,7 @@
     <string name="cancel_all">Cancel all</string>
     <string name="language">Language</string>
     <string name="app_language">App language</string>
-    <string name="app_language_description">Choose the language used by BitChord.</string>
+    <string name="app_language_description">Choose the language used by Apple Music.</string>
     <string name="english">English</string>
     <string name="spanish">Spanish</string>
     <string name="french">French</string>

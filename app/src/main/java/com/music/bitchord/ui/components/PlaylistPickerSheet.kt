@@ -245,7 +245,7 @@ private fun NewPlaylistForm(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
-                    text = "Saved to your YouTube Music account",
+                    text = "Saved to your Apple Music account",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

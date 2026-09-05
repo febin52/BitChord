@@ -490,7 +490,7 @@ fun DetailScreen(
 
             // Albums / Singles & EPs carousels (artist pages).
             items(page.sections) { shelf ->
-                Column(Modifier.padding(top = 22.dp)) {
+                Column(Modifier.padding(top = 28.dp)) {
                     SectionHeading(shelf.title, palette)
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = PAGE_GUTTER),
@@ -589,10 +589,10 @@ private fun ReleaseHeader(
             }
             // Metadata (kind • year • count)
             if (meta.isNotBlank()) {
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = meta,
-                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.7.sp),
+                    style = MaterialTheme.typography.bodySmall,
                     color = palette.onBackgroundVariant,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -1263,7 +1263,7 @@ private fun SectionHeading(title: String, palette: ArtworkPalette) {
         style = MaterialTheme.typography.headlineMedium,
         color = palette.onBackground,
         modifier = Modifier.padding(
-            start = PAGE_GUTTER, end = PAGE_GUTTER, top = 10.dp, bottom = 8.dp,
+            start = PAGE_GUTTER, end = PAGE_GUTTER, top = 8.dp, bottom = 12.dp,
         ),
     )
 }
@@ -1304,6 +1304,7 @@ private fun CompactSongRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = song.artist,
                 style = MaterialTheme.typography.bodyMedium,

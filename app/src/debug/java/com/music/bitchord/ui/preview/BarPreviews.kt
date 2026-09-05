@@ -32,7 +32,7 @@ import com.music.bitchord.ui.components.FrostedTopBar
 import com.music.bitchord.ui.components.MiniPlayer
 import com.music.bitchord.ui.components.TopFadeBlur
 import com.music.bitchord.ui.icons.BitChordIcons
-import com.music.bitchord.ui.theme.BitChordTheme
+import com.music.bitchord.ui.theme.AppleMusicTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 
@@ -108,10 +108,11 @@ private val PreviewSong = Song(
 )
 
 private val PreviewTabs = listOf(
-    BottomTab("Play", BitChordIcons.Play),
-    BottomTab("Explore", BitChordIcons.Explore),
-    BottomTab("Library", BitChordIcons.Library),
-    BottomTab("Search", BitChordIcons.Search),
+    BottomTab("Home", com.music.bitchord.R.drawable.ic_tab_home, com.music.bitchord.R.drawable.ic_tab_home_selected),
+    BottomTab("New", com.music.bitchord.R.drawable.ic_tab_new, com.music.bitchord.R.drawable.ic_tab_new_selected),
+    BottomTab("Radio", com.music.bitchord.R.drawable.ic_tab_radio, com.music.bitchord.R.drawable.ic_tab_radio_selected),
+    BottomTab("Library", com.music.bitchord.R.drawable.ic_tab_library, com.music.bitchord.R.drawable.ic_tab_library_selected),
+    BottomTab("Search", com.music.bitchord.R.drawable.ic_tab_search, com.music.bitchord.R.drawable.ic_tab_search_selected),
 )
 
 /**
@@ -181,20 +182,20 @@ private fun ChromeStack(scrolled: Boolean, withMiniPlayer: Boolean) {
 @Preview(name = "Chrome · dark", device = "id:pixel_8", showBackground = true)
 @Composable
 private fun ChromeDarkPreview() {
-    BitChordTheme(darkTheme = true) { ChromeStack(scrolled = true, withMiniPlayer = false) }
+    AppleMusicTheme(darkTheme = true) { ChromeStack(scrolled = true, withMiniPlayer = false) }
 }
 
 @Preview(name = "Chrome · light", device = "id:pixel_8", showBackground = true)
 @Composable
 private fun ChromeLightPreview() {
-    BitChordTheme(darkTheme = false) { ChromeStack(scrolled = true, withMiniPlayer = false) }
+    AppleMusicTheme(darkTheme = false) { ChromeStack(scrolled = true, withMiniPlayer = false) }
 }
 
 /** The taller scrim, which the mini player's arrival grows it into. */
 @Preview(name = "Chrome · mini player", device = "id:pixel_8", showBackground = true)
 @Composable
 private fun ChromeMiniPlayerPreview() {
-    BitChordTheme(darkTheme = true) { ChromeStack(scrolled = true, withMiniPlayer = true) }
+    AppleMusicTheme(darkTheme = true) { ChromeStack(scrolled = true, withMiniPlayer = true) }
 }
 
 /**
@@ -215,7 +216,7 @@ private fun ChromeMiniPlayerPreview() {
 )
 @Composable
 private fun MiniPlayerPreview() {
-    BitChordTheme {
+    AppleMusicTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -267,7 +268,7 @@ private fun MiniPlayerPreview() {
 )
 @Composable
 private fun ScrimRampPreview() {
-    BitChordTheme {
+    AppleMusicTheme {
         Box(Modifier.fillMaxSize()) {
             // A mid grey under it: the ramp reads as a ramp against this,
             // whereas over the theme's own background it is invisible by
@@ -293,7 +294,7 @@ private fun ScrimRampPreview() {
 @Preview(name = "Top bar · backdrops", device = "id:pixel_8", showBackground = true)
 @Composable
 private fun TopBarBackdropPreview() {
-    BitChordTheme(darkTheme = true) {
+    AppleMusicTheme(darkTheme = true) {
         Column(
             Modifier
                 .fillMaxSize()

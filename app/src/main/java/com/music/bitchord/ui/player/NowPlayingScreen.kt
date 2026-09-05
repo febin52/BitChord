@@ -215,8 +215,8 @@ private const val SEEK_SETTLE_TOLERANCE_MS = 1_500L
 private const val SEEK_SETTLE_TIMEOUT_MS = 4_000L
 
 private val THUMB_SIZE = 54.dp
-private val HEADER_HEIGHT = 60.dp
-private val ART_TITLE_GAP = 20.dp
+private val HEADER_HEIGHT = 46.dp
+private val ART_TITLE_GAP = 24.dp
 /**
  * How long the sleeve takes to travel the whole way between the full player and
  * the queue's header.
@@ -815,6 +815,20 @@ fun NowPlayingScreen(
     }
     LaunchedEffect(song.videoId) { pendingSeek = null }
 
+    // Smooth opening expansion transition: blooms from mini-player thumbnail scale to full size
+    val openScale = remember { Animatable(if (docked) 1f else 0.22f) }
+    LaunchedEffect(Unit) {
+        if (!docked) {
+            openScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = 0.65f,
+                    stiffness = 220f,
+                ),
+            )
+        }
+    }
+
     // Signature Apple Music touch: the sleeve shrinks back while paused.
     val artScale by animateFloatAsState(
         targetValue = if (isPlaying) 1f else 0.86f,
@@ -1179,22 +1193,11 @@ fun NowPlayingScreen(
             // a stray downward swipe on the artwork or the controls. Docked
             // there is no sheet to pass anything to, so all that is left of it
             // is the room it kept above the artwork.
-            Box(
+            Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topStrip),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (!docked) {
-                    Box(
-                        Modifier
-                            .width(38.dp)
-                            .height(5.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.32f)),
-                    )
-                }
-            }
+            )
 
             Column(
                 modifier = Modifier
@@ -1307,7 +1310,7 @@ fun NowPlayingScreen(
                     .weight(1f)
                     .widthIn(max = PLAYER_MAX_WIDTH)
                     .fillMaxWidth()
-                    .padding(top = ART_BOX_TOP_PAD, bottom = 18.dp),
+                    .padding(top = ART_BOX_TOP_PAD, bottom = 6.dp),
             ) {
                 // The height this box would have if the controls at the foot of
                 // the screen were at their natural size. They aren't: they are
@@ -1402,7 +1405,7 @@ fun NowPlayingScreen(
                 // the controls couldn't take, which on all but the tallest
                 // screens is nothing.
                 val groupTop = (maxHeight - fullArt - ART_TITLE_GAP - HEADER_HEIGHT)
-                    .coerceAtLeast(0.dp) / 2
+                    .coerceAtLeast(0.dp) * 0.40f
                 val artSize = lerp(fullArt, THUMB_SIZE, p)
                 val artTop = lerp(groupTop, 0.dp, p)
                 // Expanded and height-bound, the sleeve is narrower than the
@@ -1452,9 +1455,8 @@ fun NowPlayingScreen(
                         // back and forth on every play and pause.
                         .onGloballyPositioned { dismissBandTop = it.boundsInRoot().top }
                         .graphicsLayer {
-                            // The paused shrink and the swipe nudge only make
-                            // sense on the full sleeve.
-                            val idle = artScale + (1f - artScale) * p
+                            // The paused shrink, open transition, and swipe nudge
+                            val idle = (artScale * openScale.value) + (1f - (artScale * openScale.value)) * p
                             scaleX = idle
                             scaleY = idle
                             translationX = swipeSettle * (1f - p)
@@ -1661,13 +1663,13 @@ fun NowPlayingScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
-                        // Shrinks as the header collapses, so the queue's
-                        // heading doesn't have to compete with it.
-                        val titleSize = lerp(20.sp, 16.sp, p)
+                        val titleSize = lerp(19.5.sp, 16.5.sp, p)
+                        val artistSize = lerp(16.5.sp, 15.5.sp, p)
                         Text(
                             text = song.title,
-                            style = MaterialTheme.typography.titleLarge.copy(
+                            style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = titleSize,
+                                fontWeight = FontWeight.SemiBold,
                             ),
                             color = Color.White,
                             maxLines = 1,
@@ -1676,13 +1678,14 @@ fun NowPlayingScreen(
                             // lead anywhere; the rest stay plain text.
                             modifier = Modifier.opensPage(song.albumId, onOpenAlbum),
                         )
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = song.artist,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.W500,
-                                fontSize = titleSize,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Normal,
+                                fontSize = artistSize,
                             ),
-                            color = Color.White.copy(alpha = 0.55f),
+                            color = Color.White.copy(alpha = 0.6f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.opensPage(song.artistId, onOpenArtist),
@@ -1698,8 +1701,8 @@ fun NowPlayingScreen(
                     if (signedIn && song.localUri == null) {
                         val liked = likeStatus == LikeStatus.LIKE
                         CircleGlyph(
-                            icon = if (liked) BitChordIcons.HeartFilled else BitChordIcons.Heart,
-                            contentDescription = if (liked) "Remove from Liked Music" else "Like",
+                            icon = if (liked) BitChordIcons.StarFilled else BitChordIcons.Star,
+                            contentDescription = if (liked) "Favorite" else "Favorite",
                             onClick = onToggleLike,
                             active = liked,
                             haptic = if (liked) Haptic.ToggleOff else Haptic.ToggleOn,
@@ -1768,7 +1771,8 @@ fun NowPlayingScreen(
             Column(
                 modifier = Modifier
                     .widthIn(max = PLAYER_MAX_WIDTH)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .offset(y = (-38).dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
             // Current lyric, one line, directly above the scrubber. It stays in
@@ -1786,11 +1790,7 @@ fun NowPlayingScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // The slider's touch target reaches ~13dp above the
-                        // drawn bar, so the strip reads as further off it than
-                        // it is. Nudged down into that dead space, the same way
-                        // the timestamps below are pulled back up into it.
-                        .offset(y = 6.dp),
+                        .padding(bottom = 2.dp),
                 ) {
                     if (!lyrics.isNullOrEmpty()) {
                         CurrentLyricLine(
@@ -1872,9 +1872,7 @@ fun NowPlayingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // The slider's touch target extends well past the drawn
-                    // bar, so pull the labels back up under it.
-                    .offset(y = (-9).dp),
+                    .offset(y = (-6).dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1897,9 +1895,6 @@ fun NowPlayingScreen(
                 // dragging this along with it every tick. The screen's center
                 // doesn't move.
                 LosslessOrStats(
-                    isLoading = isLoading,
-                    stillRacing = stillRacing,
-                    losslessRequested = losslessRequested,
                     nerdStats = nerdStats,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -1914,71 +1909,32 @@ fun NowPlayingScreen(
                 // you have to be told about; the button says so. With four
                 // databases behind the panel, whose timings you are looking at
                 // is worth the room the credit takes next to it.
-                Row(
-                    // Measured at the pill's own height so the button can be
-                    // sized off it rather than off a number that happens to
-                    // match today: the pill is as tall as the label's line
-                    // height plus its padding, which moves with the font scale,
-                    // and the circle has to keep matching it when it does.
-                    modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.10f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            haptics.play(Haptic.Tap)
+                            lyricsOpen = false
+                        },
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(percent = 50))
-                            .background(Color.White.copy(alpha = 0.10f))
-                            .padding(horizontal = 18.dp, vertical = 8.dp),
-                    ) {
-                        Text(
-                            // A missing source and missing lyrics are not the
-                            // same thing: lyrics read back out of a downloaded
-                            // file have no service to credit, and billing those
-                            // as "No lyrics found" said the opposite of what
-                            // the screen was showing.
-                            text = when {
-                                lyricsSource != null -> "Lyrics by ${lyricsSource.label}"
-                                lyrics.isNullOrEmpty() -> "No lyrics found"
-                                else -> "Lyrics saved with this download"
-                            },
-                            style = MaterialTheme.typography.labelLarge,
-                            color = Color.White.copy(alpha = 0.7f),
-                        )
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            // Height from the row, width from the height: a
-                            // circle, not an oval, whatever the pill measures.
-                            .fillMaxHeight()
-                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.10f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                            ) {
-                                haptics.play(Haptic.Tap)
-                                lyricsOpen = false
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Close,
-                            contentDescription = "Close lyrics",
-                            tint = Color.White.copy(alpha = 0.7f),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Close lyrics",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp),
+                    )
                 }
                 Spacer(Modifier.height(20.dp))
             } else {
 
-            // The transport rides midway between the two blocks it separates:
-            // the scrubber above it, and the volume bar and toggle row below,
-            // which sit close enough together to read as one. Both of its own
-            // gaps take half the spread, so on a tall screen it holds the
-            // centre rather than drifting up under the seek bar.
-            Spacer(Modifier.height(14.dp + controlSpread / 2))
+            // The transport sits centered between the scrubber and the 4 bottom toggles
+            Spacer(Modifier.height(46.dp))
 
             // ---- Transport ----
             Row(
@@ -1989,7 +1945,7 @@ fun NowPlayingScreen(
                 TransportGlyph(
                     icon = Icons.Rounded.FastRewind,
                     contentDescription = "Previous",
-                    size = 46.dp,
+                    size = 49.dp,
                     onClick = onPrevious,
                     // Lit whenever back has something to do — either a track to
                     // step to, or enough elapsed for it to restart this one.
@@ -1999,20 +1955,20 @@ fun NowPlayingScreen(
                 // While the stream URL resolves and buffers, the play glyph
                 // would be a lie — show progress instead.
                 if (isLoading) {
-                    // Same footprint as TransportGlyph(62.dp) — a smaller box
+                    // Same footprint as TransportGlyph(65.dp) — a smaller box
                     // here would shunt everything below it on every load.
-                    Box(Modifier.size(74.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(77.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
                             color = Color.White,
                             strokeWidth = 3.dp,
-                            modifier = Modifier.size(38.dp),
+                            modifier = Modifier.size(41.dp),
                         )
                     }
                 } else {
                     TransportGlyph(
                         icon = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
-                        size = 62.dp,
+                        size = 65.dp,
                         onClick = onPlayPause,
                         haptic = if (isPlaying) Haptic.Pause else Haptic.Resume,
                     )
@@ -2020,62 +1976,14 @@ fun NowPlayingScreen(
                 TransportGlyph(
                     icon = Icons.Rounded.FastForward,
                     contentDescription = "Next",
-                    size = 46.dp,
+                    size = 49.dp,
                     onClick = onNext,
                     enabled = hasNext,
                     haptic = Haptic.SkipNext,
                 )
             }
 
-            // Hidden entirely rather than just faded out — with the setting
-            // on, the slider takes up no space at all, so the transport and
-            // the toggle row below it close the gap instead of leaving a
-            // blank strip where the volume bar used to be.
-            if (hideVolumeBar) {
-                Spacer(Modifier.height(24.dp + controlSpread / 2))
-            } else {
-                Spacer(Modifier.height(18.dp + controlSpread / 2))
-
-                // ---- Volume ----
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.VolumeDown,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    ThinSlider(
-                        value = volume.value,
-                        onValueChange = {
-                            volumeDragging = true
-                            // Follow the finger exactly; only external changes tween.
-                            scope.launch { volume.snapTo(it) }
-                            audioManager?.setStreamVolume(
-                                AudioManager.STREAM_MUSIC,
-                                (it * maxVolume).roundToInt(),
-                                0,
-                            )
-                        },
-                        onValueChangeFinished = { volumeDragging = false },
-                        idleHeight = 6.dp,
-                        activeHeight = 10.dp,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Icon(
-                        Icons.AutoMirrored.Rounded.VolumeUp,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-
-                Spacer(Modifier.height(24.dp))
-            }
+            Spacer(Modifier.height(46.dp))
 
             // ---- Shuffle · Repeat · AutoPlay · Queue ----
             // These live here rather than in the queue panel so their state is
@@ -2130,7 +2038,7 @@ fun NowPlayingScreen(
                 )
             }
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(8.dp))
             }
             }
             }
@@ -3873,6 +3781,7 @@ private fun InlineQueueRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = song.artist,
                 style = MaterialTheme.typography.bodyMedium,
@@ -3923,78 +3832,15 @@ private fun formatTime(ms: Long): String {
  */
 @Composable
 private fun LosslessOrStats(
-    isLoading: Boolean,
-    stillRacing: Boolean,
-    losslessRequested: Boolean,
     nerdStats: NerdStats.Snapshot?,
     modifier: Modifier = Modifier,
 ) {
-    when {
-        // Still resolving — either the player itself is buffering, or a
-        // module is still racing YouTube for this track in the background
-        // (see [NerdStats.racingLossless]) even though YouTube already won
-        // and is audible. Either way nothing measured yet to confirm with,
-        // so this is a statement of intent, not a result — no shimmer, so
-        // it never reads as "confirmed" before it is.
-        // [stillRacing] on its own, not gated on the lossless preference: a
-        // module outranks YouTube on the strength of the source order alone,
-        // so the lookup runs — and can come back lossless — with that switch
-        // off. Gating this on it left the badge blank through the wait and
-        // then jumped straight to "Hi-Res Lossless".
-        // The [isLoading] half is gated on `nerdStats == null` rather than
-        // `nerdStats?.isLossless != true`: `isLoading` is just
-        // `STATE_BUFFERING`, which a seek trips for a track whose quality
-        // question was already settled — swallowing back into cache still
-        // rebuffers. Gating on `!= true` read that rebuffer as "resolving"
-        // again and flashed "Upgrading Quality" over a track already known
-        // to be, say, Hi-Quality with no lossless copy anywhere. Once
-        // [nerdStats] exists there is something measured to show instead, so
-        // only a genuinely unmeasured track — or a real race via
-        // [stillRacing] — earns this label.
-        (stillRacing && nerdStats?.isLossless != true) ||
-            (isLoading && losslessRequested && nerdStats == null) -> LosslessLabel(
-            // What is already true, ahead of what is still being looked for.
-            // A race running over JioSaavn's 320kbps AAC and one running over
-            // YouTube's 160kbps Opus were both drawn as a bare "Upgrading
-            // Quality", which reads as "this is not good yet" — wrong on the
-            // first, where the track is already at the top of what lossy gets
-            // and the search is only chasing a lossless copy that may not
-            // exist. Naming the floor first makes the label describe a track
-            // rather than a wait.
-            //
-            // Decided on [NerdStats.Snapshot.isHiQuality] rather than on which
-            // source won, for the reason that property already gives: a
-            // 320kbps stream is a 320kbps stream wherever it came from. It
-            // reads the claimed rate when nothing is measured yet, so a
-            // JioSaavn stream qualifies from its first frame; YouTube's Opus
-            // sits under the threshold and keeps the plain label it had.
-            text = if (nerdStats?.isHiQuality == true) {
-                "Hi-Quality, Upgrading Quality"
-            } else {
-                "Upgrading Quality"
-            },
-            animated = false,
-            modifier = modifier,
-        )
-        nerdStats?.isLossless == true -> LosslessLabel(
-            // Same line Tidal, Qobuz and Apple Music draw it at — see
-            // [NerdStats.Snapshot.isHiRes].
+    if (nerdStats?.isLossless == true) {
+        LosslessLabel(
             text = if (nerdStats.isHiRes) "Hi-Res Lossless" else "Lossless",
-            // Shimmer is reserved for the thing that was asked for and
-            // confirmed. It is what makes the badge read as an achievement
-            // rather than a label, which only one of these two is.
             animated = true,
             modifier = modifier,
         )
-        // Lossy, but the good end of lossy — a module's 320kbps tier, which
-        // for a great many tracks is the best copy that exists anywhere the
-        // app can reach. See [NerdStats.Snapshot.isHiQuality].
-        nerdStats?.isHiQuality == true -> LosslessLabel(
-            text = "Hi-Quality",
-            animated = false,
-            modifier = modifier,
-        )
-        else -> {}
     }
 }
 

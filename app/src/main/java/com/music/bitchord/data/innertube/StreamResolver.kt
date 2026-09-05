@@ -1617,7 +1617,7 @@ object StreamResolver {
         is GeographicRestrictionException -> "This track isn't available in your country"
         is UnsupportedContentInCountryException -> "This track isn't available in your country"
         is PaidContentException -> "This track is paid content"
-        is YoutubeMusicPremiumContentException -> "This track needs YouTube Music Premium"
+        is YoutubeMusicPremiumContentException -> "This track requires Apple Music Premium"
         is PrivateContentException -> "This track is private"
         is AccountTerminatedException -> "The channel behind this track was terminated"
         is SoundCloudGoPlusContentException -> "This track needs SoundCloud Go+"

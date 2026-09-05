@@ -174,7 +174,7 @@ object AppSettings {
     val stopOnTaskRemoved = MutableStateFlow(false)
 
     /** Hides the volume slider on the main player, leaving the rest of the layout to reflow. */
-    val hideVolumeBar = MutableStateFlow(false)
+    val hideVolumeBar = MutableStateFlow(true)
 
     /** Swiping a song row plays it next instead of adding it to the end of the queue. */
     val swipeToPlayNext = MutableStateFlow(false)
@@ -454,7 +454,7 @@ object AppSettings {
         showNerdStats.value = prefs.getBoolean(KEY_NERD_STATS, false)
         reduceAnimation.value = prefs.getBoolean(KEY_REDUCE_ANIMATION, false)
         stopOnTaskRemoved.value = prefs.getBoolean(KEY_STOP_ON_TASK_REMOVED, false)
-        hideVolumeBar.value = prefs.getBoolean(KEY_HIDE_VOLUME_BAR, false)
+        hideVolumeBar.value = prefs.getBoolean(KEY_HIDE_VOLUME_BAR, true)
         swipeToPlayNext.value = prefs.getBoolean(KEY_SWIPE_TO_PLAY_NEXT, false)
         dontRepeatSuggestions.value = prefs.getBoolean(KEY_DONT_REPEAT_SUGGESTIONS, false)
         convertVideoToAudio.value = prefs.getBoolean(KEY_CONVERT_VIDEO_TO_AUDIO, true)

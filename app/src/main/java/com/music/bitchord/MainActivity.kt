@@ -45,12 +45,22 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.LibraryMusic
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +95,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.music.bitchord.auth.DiscordLoginScreen
@@ -170,9 +181,10 @@ import com.music.bitchord.ui.replay.ReplayShareSheet
 import com.music.bitchord.ui.replay.ReplayStories
 import com.music.bitchord.ui.replay.ReplayStoryPage
 import com.music.bitchord.ui.replay.rememberReplayState
-import com.music.bitchord.ui.theme.BitChordTheme
+import com.music.bitchord.ui.theme.AppleMusicTheme
 import com.music.bitchord.ui.theme.rememberArtworkPalette
 import com.music.bitchord.ui.theme.SystemBarIcons
+import com.music.bitchord.ui.splash.AppleMusicSplashScreen
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
@@ -194,7 +206,7 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            BitChordTheme(darkTheme = darkTheme) {
+            AppleMusicTheme(darkTheme = darkTheme) {
                 // The window's width, measured rather than asked for.
                 //
                 // `Configuration.screenWidthDp` is the wrong question here: in a
@@ -269,6 +281,7 @@ private fun BitChordApp(
         }
     }
     var showLogin by remember { mutableStateOf(false) }
+    var showTopMenu by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     // Replay: the page, the stories over it, and the share sheet over those.
     // Three states rather than one enum because they stack — the stories are
@@ -550,10 +563,31 @@ private fun BitChordApp(
     }
 
     val tabs = listOf(
-        BottomTab(stringResource(R.string.play), BitChordIcons.Play),
-        BottomTab(stringResource(R.string.explore), BitChordIcons.Explore),
-        BottomTab(stringResource(R.string.library), BitChordIcons.Library),
-        BottomTab(stringResource(R.string.search), BitChordIcons.Search),
+        BottomTab(
+            label = "Home",
+            iconRes = R.drawable.ic_tab_home,
+            selectedIconRes = R.drawable.ic_tab_home_selected,
+        ),
+        BottomTab(
+            label = "New",
+            iconRes = R.drawable.ic_tab_new,
+            selectedIconRes = R.drawable.ic_tab_new_selected,
+        ),
+        BottomTab(
+            label = "Radio",
+            iconRes = R.drawable.ic_tab_radio,
+            selectedIconRes = R.drawable.ic_tab_radio_selected,
+        ),
+        BottomTab(
+            label = "Library",
+            iconRes = R.drawable.ic_tab_library,
+            selectedIconRes = R.drawable.ic_tab_library_selected,
+        ),
+        BottomTab(
+            label = "Search",
+            iconRes = R.drawable.ic_tab_search,
+            selectedIconRes = R.drawable.ic_tab_search_selected,
+        ),
     )
 
     val scope = rememberCoroutineScope()
@@ -1045,7 +1079,7 @@ private fun BitChordApp(
     // See [topBarContentPadding].
     val listPadding = PaddingValues(
         top = topBarContentPadding(),
-        bottom = if (player.song != null && !playerDocked) 210.dp else 140.dp,
+        bottom = if (player.song != null && !playerDocked) 130.dp else 72.dp,
     )
 
     // What colour the page currently under the bars is. The fades either end
@@ -1237,6 +1271,17 @@ private fun BitChordApp(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
+        // Apple Music splash screen — shown during cold-start loading,
+        // crossfades away once the first feed has arrived.
+        val showSplash = homeState is UiState.Loading && player.song == null
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showSplash,
+            enter = androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(400)),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            AppleMusicSplashScreen()
+        }
         // A pushed album/artist/playlist page replaces the tab content but
         // leaves the tab bar and mini player in place.
         // Replay's three layers unwind in the order they were opened. Ahead of
@@ -1614,6 +1659,8 @@ private fun BitChordApp(
                             listState = homeListState,
                             signedIn = signedIn,
                             onSignIn = { showLogin = true },
+                            account = account,
+                            onOpenAccount = { showAccountScrobbling = true },
                             onItemClick = { item ->
                                 when {
                                     item.videoId != null -> playRadio(
@@ -1860,10 +1907,61 @@ private fun BitChordApp(
                             // [TopBarDownloadButton], which decides that for
                             // itself rather than being told.
                             TopBarDownloadButton(onClick = { showDownloadManager = true })
-                            TopBarAccountButton(
-                                account = account,
-                                onClick = { showSettings = true },
-                            )
+                            Box {
+                                IconButton(onClick = { showTopMenu = true }) {
+                                    Icon(
+                                        Icons.Rounded.MoreVert,
+                                        contentDescription = stringResource(R.string.settings),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                                MaterialTheme(
+                                    shapes = MaterialTheme.shapes.copy(
+                                        extraSmall = RoundedCornerShape(14.dp),
+                                    ),
+                                ) {
+                                    DropdownMenu(
+                                        expanded = showTopMenu,
+                                        onDismissRequest = { showTopMenu = false },
+                                        offset = DpOffset(x = 0.dp, y = 4.dp),
+                                        containerColor = Color(0xFF2C2C2E),
+                                        modifier = Modifier.widthIn(min = 160.dp),
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "Settings",
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontSize = 17.sp,
+                                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+                                                    ),
+                                                    color = Color.White,
+                                                )
+                                            },
+                                            onClick = {
+                                                showTopMenu = false
+                                                showSettings = true
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "Account",
+                                                    style = MaterialTheme.typography.titleMedium.copy(
+                                                        fontSize = 17.sp,
+                                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+                                                    ),
+                                                    color = Color.White,
+                                                )
+                                            },
+                                            onClick = {
+                                                showTopMenu = false
+                                                showAccountScrobbling = true
+                                            },
+                                        )
+                                    }
+                                }
+                            }
                         }
                     },
                 )
@@ -1881,16 +1979,9 @@ private fun BitChordApp(
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        // Capped and centred rather than run to the page's edges
-                        // — see [FLOATING_BAR_MAX_WIDTH]. It sits on the Column
-                        // rather than on each bar so the two are held to the same
-                        // width and keep the shared left and right edge they have
-                        // on a phone. Before fillMaxWidth, so the fill has
-                        // already been bounded by the time it is applied.
-                        .widthIn(max = FLOATING_BAR_MAX_WIDTH)
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     // Only where the player isn't already open beside the page:
                     // a bar whose whole job is to stand in for the player, next
@@ -1906,6 +1997,8 @@ private fun BitChordApp(
                             },
                             onNext = { controller?.seekToNextMediaItem() },
                             onExpand = { showNowPlaying = true },
+                            positionMs = player.position.positionMs,
+                            durationMs = player.durationMs,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -1914,6 +2007,10 @@ private fun BitChordApp(
                         selectedIndex = selectedTab,
                         hazeState = hazeState,
                         onTabSelected = { index ->
+                            if (index == TAB_RADIO) {
+                                // Radio tab: do not navigate anywhere as requested
+                                return@FloatingBottomBar
+                            }
                             // Re-tapping the search tab while already on it focuses the
                             // input field and opens the keyboard rather than resetting.
                             if (index == TAB_SEARCH && selectedTab == TAB_SEARCH) {
@@ -2318,7 +2415,7 @@ private fun BitChordApp(
                             )
                         }
                         Text(
-                            "Sign in to YouTube Music",
+                            "Sign in to Apple Music",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                         )
@@ -2646,8 +2743,9 @@ private val DETAIL_TITLE_DROP = 320.dp
 
 private const val TAB_HOME = 0
 private const val TAB_EXPLORE = 1
-private const val TAB_LIBRARY = 2
-private const val TAB_SEARCH = 3
+private const val TAB_RADIO = 2
+private const val TAB_LIBRARY = 3
+private const val TAB_SEARCH = 4
 
 /**
  * What a tab's key is prefixed with in the content switcher above.

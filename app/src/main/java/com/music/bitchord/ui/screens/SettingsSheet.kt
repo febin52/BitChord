@@ -95,12 +95,14 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
@@ -254,30 +256,9 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(contentPadding),
     ) {
-        Text(
-            text = stringResource(R.string.settings),
-            style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 14.dp),
-        )
+        Spacer(Modifier.height(8.dp))
 
-        SettingsGroup {
-            SettingsRow(
-                icon = Icons.Rounded.Person,
-                title = stringResource(R.string.account_integrations),
-                subtitle = account?.email?.takeIf { it.isNotBlank() }
-                    ?: if (signedIn) "Signed in" else "Not signed in",
-                onClick = onAccountScrobbling,
-            )
-        }
-
-        // The row that used to sit at the top of this group was called
-        // "Lossless / HQ Audio" and toggled `SourceRegistry.setModuleEnabled` —
-        // it switched the *module source* on and off, not lossless. Sources
-        // above lists that as the module's own row now. Lossless itself is no
-        // longer a setting at all — see
-        // [SourceResolver.requestForNow][com.music.bitchord.data.sources.SourceResolver.requestForNow].
-        SettingsGroup(header = "Audio quality") {
+        SettingsGroup(header = "Audio") {
             SettingsRow(
                 icon = Icons.Rounded.Extension,
                 title = "Sources",
@@ -302,11 +283,6 @@ fun SettingsScreen(
             )
         }
 
-        // Its own group rather than rows bolted onto the two above, because a
-        // download is not a third kind of connection. The ceilings answer "what
-        // does this minute cost"; these answer "what am I keeping, and when may
-        // it be fetched" — and those two questions only make sense read
-        // together, which is what puts them side by side here.
         SettingsGroup(header = stringResource(R.string.downloads)) {
             SettingsRow(
                 icon = Icons.Rounded.Download,
@@ -315,9 +291,7 @@ fun SettingsScreen(
                 value = downloadQuality.localizedLabel(),
                 onClick = { pickingDownloadQuality = true },
             )
-            // Reads as part of Download quality above it, not as a setting
-            // of its own — same treatment as Play animated cover over
-            // cellular gets under Animated cover art.
+            RowDivider()
             SettingsSubRow(
                 title = stringResource(R.string.download_wifi_only),
                 checked = wifiOnlyDownloads,
@@ -327,9 +301,6 @@ fun SettingsScreen(
         }
 
         SettingsGroup(header = stringResource(R.string.playback)) {
-            // Automix decides its own length from each pair of tracks —
-            // tempo, key, structure — so it replaces the manual slider rather
-            // than needing it set to anything first.
             if (!smartFade) {
                 SliderRow(
                     icon = Icons.Rounded.Waves,
@@ -352,13 +323,9 @@ fun SettingsScreen(
                     "Times and blends transitions automatically, no slider needed. May not work as expected in low-mid range devices."
                 },
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = smartFade,
                         onCheckedChange = AppSettings::setSmartFadeEnabled,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setSmartFadeEnabled(!smartFade) },
@@ -369,13 +336,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.skip_silence),
                 subtitle = stringResource(R.string.skip_silence_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = skipSilence,
                         onCheckedChange = AppSettings::setSkipSilence,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setSkipSilence(!skipSilence) },
@@ -386,13 +349,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.spatial_audio),
                 subtitle = stringResource(R.string.spatial_audio_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = spatialAudio,
                         onCheckedChange = AppSettings::setSpatialAudio,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setSpatialAudio(!spatialAudio) },
@@ -410,13 +369,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.show_nerd_stats),
                 subtitle = stringResource(R.string.show_nerd_stats_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = nerdStats,
                         onCheckedChange = AppSettings::setShowNerdStats,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setShowNerdStats(!nerdStats) },
@@ -427,13 +382,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.video_audio_conversion),
                 subtitle = stringResource(R.string.video_audio_conversion_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = !convertVideoToAudio,
                         onCheckedChange = { AppSettings.setConvertVideoToAudio(!it) },
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setConvertVideoToAudio(!convertVideoToAudio) },
@@ -446,7 +397,7 @@ fun SettingsScreen(
                 options = ThemeMode.entries.map { it.localizedLabel() },
                 selectedIndex = ThemeMode.entries.indexOf(theme),
                 onSelect = { AppSettings.setThemeMode(ThemeMode.entries[it]) },
-                modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
+                modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 12.dp),
             )
             RowDivider()
             SettingsRow(
@@ -454,13 +405,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.reduce_animation),
                 subtitle = stringResource(R.string.reduce_animation_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = reduceAnimation,
                         onCheckedChange = AppSettings::setReduceAnimation,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setReduceAnimation(!reduceAnimation) },
@@ -471,35 +418,23 @@ fun SettingsScreen(
                 title = stringResource(R.string.reduce_dynamic_blur),
                 subtitle = stringResource(R.string.reduce_dynamic_blur_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = reduceDynamicBlur,
                         onCheckedChange = AppSettings::setReduceDynamicBlur,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setReduceDynamicBlur(!reduceDynamicBlur) },
             )
             RowDivider()
-            // Left out where the player won't honour it: a window too wide for
-            // the player to fill and too narrow to stand a page beside it keeps
-            // the sleeve either way. A docked pane is a phone's width, so it does
-            // honour it — see [fullBleedArtworkAvailable].
             if (fullBleedArtworkAvailable(windowWidth)) {
                 SettingsRow(
                     icon = Icons.Rounded.Fullscreen,
                     title = stringResource(R.string.full_screen_cover_art),
                     subtitle = stringResource(R.string.full_screen_cover_art_subtitle),
                     trailing = {
-                        Switch(
+                        AppleMusicSwitch(
                             checked = fullBleedArtwork,
                             onCheckedChange = AppSettings::setFullBleedArtwork,
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                checkedBorderColor = MaterialTheme.colorScheme.primary,
-                            ),
                         )
                     },
                     onClick = { AppSettings.setFullBleedArtwork(!fullBleedArtwork) },
@@ -511,45 +446,25 @@ fun SettingsScreen(
                 title = stringResource(R.string.animated_cover_art),
                 subtitle = stringResource(R.string.animated_cover_art_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = animatedCanvas,
                         onCheckedChange = AppSettings::setAnimatedCanvas,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setAnimatedCanvas(!animatedCanvas) },
             )
-            // Reads as part of the Animated cover art option above it, not
-            // as a separate setting. Nothing to narrow while the clip itself
-            // is off. Defaults to off: a clip loops for as long as its track
-            // plays, so on cellular this is not a one-time video cost but
-            // that cost repeated on every loop — see AppSettings.canvasOverCellular.
             if (animatedCanvas) {
+                RowDivider()
                 SettingsSubRow(
                     title = stringResource(R.string.animated_cover_cellular),
                     checked = canvasOverCellular,
                     onCheckedChange = AppSettings::setCanvasOverCellular,
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onSpotifyCanvasAuth)
-                        .padding(start = ROW_INSET, end = ROW_INSET, top = 4.dp, bottom = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Integrate Spotify Canvas",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Chevron()
-                }
+                RowDivider()
+                SettingsRow(
+                    title = "Integrate Spotify Canvas",
+                    onClick = onSpotifyCanvasAuth,
+                )
             }
             RowDivider()
             SettingsRow(
@@ -557,20 +472,13 @@ fun SettingsScreen(
                 title = stringResource(R.string.synced_lyrics),
                 subtitle = stringResource(R.string.synced_lyrics_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = syncedLyrics,
                         onCheckedChange = AppSettings::setSyncedLyrics,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setSyncedLyrics(!syncedLyrics) },
             )
-            // Nothing to choose between while the feature is off, and the
-            // sources are third-party services being reached on the user's
-            // connection — which is the part worth being able to narrow.
             if (syncedLyrics) {
                 RowDivider()
                 SettingsRow(
@@ -648,13 +556,9 @@ fun SettingsScreen(
                     "Replay's genre chart is hidden while this is off"
                 },
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = replayGenres,
                         onCheckedChange = AppSettings::setReplayGenres,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setReplayGenres(!replayGenres) },
@@ -688,13 +592,9 @@ fun SettingsScreen(
                     "Swiping a song adds it to the end of the queue when disabled"
                 },
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = swipeToPlayNext,
                         onCheckedChange = AppSettings::setSwipeToPlayNext,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setSwipeToPlayNext(!swipeToPlayNext) },
@@ -705,13 +605,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.dont_repeat_songs),
                 subtitle = stringResource(R.string.dont_repeat_songs_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = dontRepeatSuggestions,
                         onCheckedChange = AppSettings::setDontRepeatSuggestions,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setDontRepeatSuggestions(!dontRepeatSuggestions) },
@@ -722,13 +618,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.stop_music_on_close),
                 subtitle = stringResource(R.string.stop_music_on_close_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = stopOnTaskRemoved,
                         onCheckedChange = AppSettings::setStopOnTaskRemoved,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setStopOnTaskRemoved(!stopOnTaskRemoved) },
@@ -739,13 +631,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.hide_volume_bar),
                 subtitle = stringResource(R.string.hide_volume_bar_subtitle),
                 trailing = {
-                    Switch(
+                    AppleMusicSwitch(
                         checked = hideVolumeBar,
                         onCheckedChange = AppSettings::setHideVolumeBar,
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        ),
                     )
                 },
                 onClick = { AppSettings.setHideVolumeBar(!hideVolumeBar) },
@@ -1077,7 +965,7 @@ internal fun AccountCard(
             Spacer(Modifier.height(2.dp))
             Text(
                 text = account?.email?.takeIf { it.isNotBlank() }
-                    ?: if (signedIn) "YouTube Music account" else "Tap to sign in with Google",
+                    ?: if (signedIn) "Apple Music account" else "Tap to sign in with Google",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -1250,57 +1138,74 @@ private fun DownloadQualitySheet(
 // ---- Building blocks --------------------------------------------------------
 
 internal val GroupShape = RoundedCornerShape(14.dp)
-internal val GROUP_INSET = 16.dp
-internal val ROW_INSET = 16.dp
+internal val GROUP_INSET = 20.dp
+internal val ROW_INSET = 20.dp
 internal val ICON_SIZE = 22.dp
 internal val ICON_GAP = 14.dp
 
-/** Where a row's text starts — dividers are inset to match, as on iOS. */
-internal val TEXT_INSET = ROW_INSET + ICON_SIZE + ICON_GAP
-
 /**
- * One inset card of rows, with an uppercase header above and an optional
- * plain-language [footer] below. Rows are separated by [RowDivider].
+ * Clean flat Apple Music settings section, with bold red header above,
+ * optional subtitle description, rows, and an optional footer below.
  */
 @Composable
 internal fun SettingsGroup(
     header: String? = null,
+    subtitle: String? = null,
     footer: String? = null,
     content: @Composable () -> Unit,
 ) {
     if (header != null) {
-        Text(
-            text = header.uppercase(Locale.ROOT),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(
-                start = GROUP_INSET + 4.dp,
-                end = GROUP_INSET,
-                top = 26.dp,
-                bottom = 8.dp,
-            ),
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = ROW_INSET,
+                    end = ROW_INSET,
+                    top = 22.dp,
+                    bottom = if (subtitle != null) 4.dp else 10.dp,
+                ),
+        ) {
+            Text(
+                text = header,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+                color = MaterialTheme.colorScheme.primary, // Apple Music Red #FA2D48
+            )
+            if (subtitle != null) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 13.5.sp,
+                        lineHeight = 18.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     } else {
-        Spacer(Modifier.height(26.dp))
+        Spacer(Modifier.height(12.dp))
     }
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = GROUP_INSET)
-            .clip(GroupShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         content()
     }
     if (footer != null) {
         Text(
             text = footer,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 13.sp,
+                lineHeight = 17.sp,
+            ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(
-                start = GROUP_INSET + 4.dp,
-                end = GROUP_INSET + 4.dp,
-                top = 8.dp,
+                start = ROW_INSET,
+                end = ROW_INSET,
+                top = 6.dp,
+                bottom = 4.dp,
             ),
         )
     }
@@ -1309,19 +1214,19 @@ internal fun SettingsGroup(
 @Composable
 internal fun RowDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(start = TEXT_INSET),
+        modifier = Modifier.padding(start = ROW_INSET),
         thickness = 0.5.dp,
-        color = MaterialTheme.colorScheme.outline,
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
     )
 }
 
 /**
- * The standard row: glyph, title, optional subtitle, and on the right either
- * [trailing] (a switch, say) or the current [value] followed by a chevron.
+ * Standard Apple Music row: title, optional subtitle underneath, and on the right
+ * either trailing (switch/custom) or the value + subtle chevron.
  */
 @Composable
 internal fun SettingsRow(
-    icon: ImageVector,
+    icon: ImageVector? = null,
     title: String,
     subtitle: String? = null,
     subtitleContent: (@Composable () -> Unit)? = null,
@@ -1337,21 +1242,17 @@ internal fun SettingsRow(
             .then(if (onClick != null && enabled) Modifier.clickable(onClick = onClick) else Modifier)
             .alpha(if (enabled) 1f else 0.45f)
             .heightIn(min = 52.dp)
-            .padding(horizontal = ROW_INSET, vertical = 12.dp),
+            .padding(horizontal = ROW_INSET, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.size(ICON_SIZE),
-        )
-        Spacer(Modifier.width(ICON_GAP))
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 16.5.sp,
+                        fontWeight = FontWeight.Normal,
+                    ),
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1362,11 +1263,16 @@ internal fun SettingsRow(
                 }
             }
             if (subtitleContent != null) {
+                Spacer(Modifier.height(2.dp))
                 subtitleContent()
             } else if (subtitle != null) {
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 13.5.sp,
+                        lineHeight = 17.sp,
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 5,
                 )
@@ -1379,7 +1285,9 @@ internal fun SettingsRow(
             if (value != null) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 16.sp,
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                 )
@@ -1391,9 +1299,33 @@ internal fun SettingsRow(
 }
 
 /**
- * A toggle that reads as part of the option above it rather than a setting
- * of its own: no icon, no divider, and pulled up close against its parent
- * instead of getting the same breathing room a full [SettingsRow] gets.
+ * iOS-styled switch matching the Apple Music settings toggle design.
+ */
+@Composable
+internal fun AppleMusicSwitch(
+    checked: Boolean,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
+        modifier = modifier,
+        colors = SwitchDefaults.colors(
+            checkedTrackColor = MaterialTheme.colorScheme.primary,
+            checkedThumbColor = Color.White,
+            checkedBorderColor = Color.Transparent,
+            uncheckedTrackColor = Color(0xFF39393D),
+            uncheckedThumbColor = Color.White,
+            uncheckedBorderColor = Color.Transparent,
+        ),
+    )
+}
+
+/**
+ * A toggle that reads as part of the option above it rather than a setting of its own.
  */
 @Composable
 internal fun SettingsSubRow(
@@ -1406,13 +1338,15 @@ internal fun SettingsSubRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
-            .padding(start = ROW_INSET, end = ROW_INSET, top = 0.dp, bottom = 10.dp),
+            .padding(horizontal = ROW_INSET, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 16.5.sp,
+                ),
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1422,13 +1356,9 @@ internal fun SettingsSubRow(
                 Badge(badge)
             }
         }
-        Switch(
+        AppleMusicSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedBorderColor = MaterialTheme.colorScheme.primary,
-            ),
         )
     }
 }
@@ -1452,7 +1382,7 @@ internal fun Chevron() {
     Icon(
         Icons.Rounded.ChevronRight,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
         modifier = Modifier.size(20.dp),
     )
 }
@@ -1461,7 +1391,7 @@ internal fun Chevron() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SliderRow(
-    icon: ImageVector,
+    icon: ImageVector? = null,
     title: String,
     value: String,
     sliderValue: Float,
@@ -1473,27 +1403,26 @@ internal fun SliderRow(
     val colors = SliderDefaults.colors(
         thumbColor = MaterialTheme.colorScheme.primary,
         activeTrackColor = MaterialTheme.colorScheme.primary,
-        inactiveTrackColor = MaterialTheme.colorScheme.outline,
+        inactiveTrackColor = Color(0xFF39393D),
     )
-    Column(Modifier.padding(start = ROW_INSET, end = ROW_INSET, top = 12.dp, bottom = 4.dp)) {
+    Column(Modifier.padding(horizontal = ROW_INSET, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(ICON_SIZE),
-            )
-            Spacer(Modifier.width(ICON_GAP))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 16.5.sp,
+                    ),
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 if (subtitle != null) {
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.5.sp,
+                            lineHeight = 17.sp,
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -1501,7 +1430,9 @@ internal fun SliderRow(
             Spacer(Modifier.width(12.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -1511,8 +1442,6 @@ internal fun SliderRow(
             valueRange = valueRange,
             steps = steps,
             colors = colors,
-            // Bare track: the step ticks and the end-stop dot are noise when the
-            // value is already spelled out on the line above.
             track = { state ->
                 SliderDefaults.Track(
                     sliderState = state,
@@ -1521,7 +1450,7 @@ internal fun SliderRow(
                     drawTick = { _, _ -> },
                 )
             },
-            modifier = Modifier.padding(start = ICON_SIZE + ICON_GAP),
+            modifier = Modifier.padding(top = 2.dp),
         )
     }
 }
@@ -1538,7 +1467,10 @@ internal fun DestructiveRow(label: String, onClick: () -> Unit) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 16.5.sp,
+                fontWeight = FontWeight.Medium,
+            ),
             color = MaterialTheme.colorScheme.primary,
         )
     }
@@ -1557,7 +1489,7 @@ private fun SegmentedControl(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.outline)
+            .background(Color(0xFF2C2C2E))
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -1597,7 +1529,10 @@ private fun SegmentedControl(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = 13.5.sp,
+                        fontWeight = if (chosen) FontWeight.SemiBold else FontWeight.Normal,
+                    ),
                     color = labelColor,
                     maxLines = 1,
                 )

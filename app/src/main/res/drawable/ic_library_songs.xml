@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Apple Music standard SF Symbol music.note: single solid filled glyph with thick angled rectangular top banner/flag -->
+    <!-- Notehead: tilted ellipse bottom left -->
+    <!-- Stem: vertical bar -->
+    <!-- Flag: solid parallelogram banner at top slanted upwards to right -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M13.2,16.2 C12.4,15.6 11.3,15.3 10.0,15.5 C7.5,15.9 5.8,17.7 6.1,19.5 C6.4,21.3 8.7,22.4 11.2,22.0 C13.4,21.6 15.0,20.1 15.0,18.4 L15.0,8.2 L20.5,6.4 C21.1,6.2 21.5,5.6 21.5,5.0 L21.5,3.6 C21.5,2.9 20.8,2.4 20.1,2.6 L13.8,4.7 C13.3,4.9 13.0,5.4 13.0,5.9 L13.0,16.5 L13.2,16.2 Z" />
+</vector>
