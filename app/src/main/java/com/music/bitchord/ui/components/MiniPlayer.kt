@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -51,35 +51,20 @@ import dev.chrisbanes.haze.materials.HazeMaterials
  * The transport buttons' touch target. Material's default 48dp is what a bar
  * this slim is really made of, so it sets the height on its own.
  */
-private val GLYPH_SLOT = 44.dp
+private val GLYPH_SLOT = 40.dp
 
 /**
  * The play and skip glyphs themselves.
- *
- * Deliberately grown inside [GLYPH_SLOT] rather than by growing the slot: the
- * slot is level with the 40dp artwork opposite it, and it is the taller of the
- * two that sets the row's height — so a bigger slot would make the whole bar
- * taller, which is not what a bigger glyph is being asked for. At 32 there is
- * still 4dp of clearance to the slot's edge on every side.
  */
-private val GLYPH_SIZE = 26.dp
+private val GLYPH_SIZE = 30.dp
 
 /** The spinner that stands in for the play glyph, kept in proportion to it. */
-private val SPINNER_SIZE = 22.dp
+private val SPINNER_SIZE = 24.dp
 
 /**
  * The gap between the two transport controls.
- *
- * Material asks for at least 8dp between adjacent touch targets, and these had
- * none: two [GLYPH_SLOT] boxes sharing an edge, so the boundary between "pause"
- * and "skip" was a line with nothing either side of it. What space there looked
- * to be was only the margin each glyph keeps inside its own slot, and a thumb
- * lands on a target's edge far more often than it lands on a glyph's.
- *
- * Taken from the title's width rather than the bar's height, so nothing above
- * or below it moves.
  */
-private val TRANSPORT_GAP = 8.dp
+private val TRANSPORT_GAP = 2.dp
 
 /**
  * Vertical padding, which with the 40dp artwork sets the bar's height at 56dp
@@ -214,7 +199,7 @@ fun MiniPlayer(
                 modifier = Modifier.size(GLYPH_SLOT),
             ) {
                 Icon(
-                    Icons.Rounded.SkipNext,
+                    Icons.Rounded.FastForward,
                     contentDescription = stringResource(R.string.widget_next),
                     tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.size(GLYPH_SIZE),

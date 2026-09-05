@@ -538,19 +538,6 @@ fun SettingsScreen(
                 },
                 onClick = { AppSettings.setShowNerdStats(!nerdStats) },
             )
-            RowDivider()
-            SettingsRow(
-                icon = Icons.Rounded.SmartDisplay,
-                title = stringResource(R.string.video_audio_conversion),
-                subtitle = stringResource(R.string.video_audio_conversion_subtitle),
-                trailing = {
-                    AppleMusicSwitch(
-                        checked = !convertVideoToAudio,
-                        onCheckedChange = { AppSettings.setConvertVideoToAudio(!it) },
-                    )
-                },
-                onClick = { AppSettings.setConvertVideoToAudio(!convertVideoToAudio) },
-            )
         }
 
         SettingsGroup(header = stringResource(R.string.appearance)) {
@@ -1647,6 +1634,7 @@ internal val GROUP_INSET = 20.dp
 internal val ROW_INSET = 20.dp
 internal val ICON_SIZE = 22.dp
 internal val ICON_GAP = 14.dp
+internal val TEXT_INSET = ROW_INSET + ICON_SIZE + ICON_GAP
 
 /**
  * Clean flat Apple Music settings section, with bold red header above,

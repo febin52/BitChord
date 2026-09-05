@@ -220,9 +220,8 @@ import com.music.bitchord.ui.splash.AppleMusicSplashScreen
 import com.music.bitchord.ui.utils.rememberIosOverscrollFactory
 import com.music.bitchord.ui.performance.resolvePerformanceRefreshRate
 import com.music.bitchord.ui.components.LocalLiquidGlassEnabled
-import com.music.bitchord.ui.components.backdrop.LocalAppBackdrop
-import com.music.bitchord.ui.components.backdrop.rememberLayerBackdrop
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import com.music.bitchord.ui.components.LocalAppBackdrop
+import com.music.bitchord.ui.components.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
@@ -2967,11 +2966,12 @@ private fun BitChordApp(
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 Column(Modifier.fillMaxSize()) {
                     Row(
-                        Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .statusBarsPadding()
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         IconButton(onClick = { webSession = null }) {
                             Icon(
                                 Icons.Rounded.Close,

@@ -1305,19 +1305,6 @@ fun NowPlayingScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 if (!docked) {
-                    // Centred in the strip when it's the only thing there; nudged
-                    // up when the radio caption needs the room below it.
-                    Box(
-                        (if (song.radioName != null) {
-                            Modifier.align(Alignment.TopCenter).offset(y = 6.dp)
-                        } else {
-                            Modifier.align(Alignment.Center)
-                        })
-                            .width(38.dp)
-                            .height(5.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.32f)),
-                    )
                     song.radioName?.let { radioName ->
                         Text(
                             text = stringResource(R.string.playing_radio, radioName),
@@ -1327,13 +1314,12 @@ fun NowPlayingScreen(
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
+                                .align(Alignment.Center)
                                 .padding(horizontal = 24.dp, vertical = 2.dp),
                         )
                     }
                 }
             }
->>>>>>> origin/main
 
             Column(
                 modifier = Modifier
@@ -2114,17 +2100,6 @@ fun NowPlayingScreen(
                         color = Color.White.copy(alpha = 0.55f),
                     )
                 }
-                // Pinned to the box's own center rather than squeezed into the
-                // gap between the two timestamps: that gap's width changes by
-                // a digit's worth every time a minute rolls over, which was
-                // dragging this along with it every tick. The screen's center
-                // doesn't move.
-                LosslessOrStats(
-                    nerdStats = nerdStats,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(horizontal = 8.dp),
-                )
             }
 
             if (lyricsOpen) {
@@ -2240,13 +2215,11 @@ fun NowPlayingScreen(
                 // While the stream URL resolves and buffers, the play glyph
                 // would be a lie — show progress instead.
                 if (isLoading) {
-                    // Same footprint as TransportGlyph(65.dp) — a smaller box
-                    // here would shunt everything below it on every load.
-                    Box(Modifier.size(77.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(74.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
                             color = Color.White,
-                            strokeWidth = 3.dp,
-                            modifier = Modifier.size(41.dp),
+                            strokeWidth = 2.5.dp,
+                            modifier = Modifier.size(34.dp),
                         )
                     }
                 } else {
@@ -4438,6 +4411,9 @@ private fun formatTime(ms: Long): String {
  */
 @Composable
 private fun LosslessOrStats(
+    isLoading: Boolean,
+    stillRacing: Boolean,
+    losslessRequested: Boolean,
     nerdStats: NerdStats.Snapshot?,
     modifier: Modifier = Modifier,
 ) {

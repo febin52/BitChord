@@ -31,9 +31,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -204,7 +205,7 @@ fun GlassNavBar(
                     key = index,
                     icon = {
                         Icon(
-                            imageVector = tab.icon,
+                            painter = painterResource(if (isSelected) tab.selectedIconRes else tab.iconRes),
                             contentDescription = tab.label,
                             tint = tint,
                             modifier = Modifier.size(25.dp),
@@ -217,7 +218,7 @@ fun GlassNavBar(
                     key = index,
                     icon = {
                         Icon(
-                            imageVector = tab.icon,
+                            painter = painterResource(if (isSelected) tab.selectedIconRes else tab.iconRes),
                             contentDescription = tab.label,
                             tint = tint,
                             modifier = Modifier.size(25.dp),
@@ -386,7 +387,7 @@ private fun GlassNowPlaying(
             // tab pill and the Search circle, and the title is what has to
             // survive that, not a second transport button.
             if (!isInline) {
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(2.dp))
                 IconButton(
                     onClick = {
                         haptics.play(Haptic.SkipNext)
@@ -395,7 +396,7 @@ private fun GlassNowPlaying(
                     modifier = Modifier.size(glyphSlot),
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.SkipNext,
+                        imageVector = Icons.Rounded.FastForward,
                         contentDescription = stringResource(R.string.widget_next),
                         tint = contentColor,
                         modifier = Modifier.size(glyphSize),

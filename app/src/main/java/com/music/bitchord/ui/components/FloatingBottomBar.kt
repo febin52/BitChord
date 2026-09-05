@@ -44,6 +44,10 @@ data class BottomTab(
     @DrawableRes val selectedIconRes: Int = iconRes,
 )
 
+internal val PILL_INSET = 6.dp
+internal val TAB_VERTICAL_PADDING = 9.dp
+internal val TAB_ICON_LABEL_GAP = 2.dp
+
 /**
  * Apple Music docked bottom navigation bar.
  * Runs edge-to-edge, flush at the bottom with a hairline top divider.
