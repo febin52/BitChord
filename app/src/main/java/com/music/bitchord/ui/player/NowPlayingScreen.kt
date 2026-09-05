@@ -849,14 +849,14 @@ fun NowPlayingScreen(
     LaunchedEffect(song.videoId) { pendingSeek = null }
 
     // Smooth opening expansion transition: blooms from mini-player thumbnail scale to full size
-    val openScale = remember { Animatable(if (docked) 1f else 0.22f) }
+    val openScale = remember { Animatable(if (docked) 1f else 0.50f) }
     LaunchedEffect(Unit) {
         if (!docked) {
             openScale.animateTo(
                 targetValue = 1f,
                 animationSpec = spring(
-                    dampingRatio = 0.65f,
-                    stiffness = 220f,
+                    dampingRatio = 0.78f,
+                    stiffness = Spring.StiffnessMediumLow,
                 ),
             )
         }
@@ -864,10 +864,10 @@ fun NowPlayingScreen(
 
     // Signature Apple Music touch: the sleeve shrinks back while paused.
     val artScale by animateFloatAsState(
-        targetValue = if (isPlaying) 1f else 0.86f,
+        targetValue = if (isPlaying) 1f else 0.88f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessLow,
+            dampingRatio = 0.75f,
+            stiffness = Spring.StiffnessMediumLow,
         ),
         label = "artScale",
     )
@@ -928,7 +928,10 @@ fun NowPlayingScreen(
     // read as a stutter rather than as either. One animation, both surfaces.
     val p by animateFloatAsState(
         targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
-        animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
+        animationSpec = spring(
+            dampingRatio = 0.80f,
+            stiffness = Spring.StiffnessMediumLow,
+        ),
         label = "sleeveCollapse",
     )
     val fullBleedArt by AppSettings.fullBleedArtwork.collectAsStateWithLifecycle()
