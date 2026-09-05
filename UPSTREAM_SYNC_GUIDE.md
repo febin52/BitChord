@@ -122,8 +122,12 @@ If Git reports merge conflicts in any files:
 adb install -r app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk
 adb shell am start -n com.music.bitchord/.MainActivity
 
-# Optionally push APK to device storage for manual backup
-adb push app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk /sdcard/
+# Rename v8a release binary to AppleMusic.apk
+cp app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk AppleMusic.apk
+
+# Optionally push APK to device storage for manual installation
+adb push AppleMusic.apk /sdcard/
+adb push AppleMusic.apk /sdcard/Download/
 ```
 
 ### Step 6: Commit, Push, and Update GitHub Release
@@ -131,10 +135,9 @@ adb push app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk /sdca
 # Push merged main branch to your personal repo
 git push origin main
 
-# Update / create GitHub Release with the new APK binary
+# Update / create GitHub Release with the single AppleMusic.apk asset
 gh release create <NEW_TAG> \
-  app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk \
-  app/build/outputs/apk/prod/release/app-prod-universal-release.apk \
+  AppleMusic.apk \
   --title "BitChord <NEW_TAG> (Apple Music Edition)" \
   --notes "Merged upstream updates with Apple Music UI enhancements." \
   -R febin52/BitChord
