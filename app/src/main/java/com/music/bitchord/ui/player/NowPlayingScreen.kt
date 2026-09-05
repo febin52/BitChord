@@ -926,14 +926,15 @@ fun NowPlayingScreen(
     // this same value — went on fading the banner out over the full 420. One
     // half of the artwork jumped, the other half glided after it, and the pair
     // read as a stutter rather than as either. One animation, both surfaces.
-    val p by animateFloatAsState(
+    val pRaw by animateFloatAsState(
         targetValue = if (lyricsOpen || queueOpen) 1f else 0f,
         animationSpec = spring(
-            dampingRatio = 0.80f,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMediumLow,
         ),
         label = "sleeveCollapse",
     )
+    val p = pRaw.coerceIn(0f, 1f)
     val fullBleedArt by AppSettings.fullBleedArtwork.collectAsStateWithLifecycle()
     // Full-bleed is a phone idiom, and a docked pane is a phone's width — so it
     // is asked of the player's own width rather than of the window's. Asking the
@@ -1535,14 +1536,14 @@ fun NowPlayingScreen(
                 // screens is nothing.
                 val groupTop = (maxHeight - fullArt - ART_TITLE_GAP - HEADER_HEIGHT)
                     .coerceAtLeast(0.dp) * 0.40f
-                val artSize = lerp(fullArt, THUMB_SIZE, p)
-                val artTop = lerp(groupTop, 0.dp, p)
+                val artSize = lerp(fullArt, THUMB_SIZE, p).coerceAtLeast(0.dp)
+                val artTop = lerp(groupTop, 0.dp, p).coerceAtLeast(0.dp)
                 // Expanded and height-bound, the sleeve is narrower than the
                 // player and has to be centred in it; collapsed, it belongs
                 // hard against the left edge with the credits beside it.
-                val artStart = lerp((maxWidth - fullArt) / 2, 0.dp, p)
-                val titleTop = lerp(groupTop + fullArt + ART_TITLE_GAP, 0.dp, p)
-                val titleStart = lerp(0.dp, THUMB_SIZE + 12.dp, p)
+                val artStart = lerp((maxWidth - fullArt) / 2, 0.dp, p).coerceAtLeast(0.dp)
+                val titleTop = lerp(groupTop + fullArt + ART_TITLE_GAP, 0.dp, p).coerceAtLeast(0.dp)
+                val titleStart = lerp(0.dp, THUMB_SIZE + 12.dp, p).coerceAtLeast(0.dp)
 
                 // How far down the *screen* the sleeve's bottom edge sits, which
                 // is where the full-bleed banner has to stop for the credits
