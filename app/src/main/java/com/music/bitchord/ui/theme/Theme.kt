@@ -18,12 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.music.bitchord.R
 
-// Apple Music's signature red, used sparingly as the single accent.
+// Apple Music's signature red. No longer the primary accent, but kept for the
+// spots (Replay's rank badge) that want that specific red regardless of theme.
 val AccentRed = Color(0xFFFA2D48)
 
 private val DarkColors = darkColorScheme(
-    primary = AccentRed,
-    onPrimary = Color.White,
+    primary = Color.White,
+    onPrimary = Color.Black,
     background = Color.Black,
     onBackground = Color.White,
     surface = Color(0xFF1C1C1F),
@@ -34,7 +35,7 @@ private val DarkColors = darkColorScheme(
 )
 
 private val LightColors = lightColorScheme(
-    primary = AccentRed,
+    primary = Color.Black,
     onPrimary = Color.White,
     background = Color.White,
     onBackground = Color.Black,
@@ -194,6 +195,12 @@ fun AppleMusicTheme(
         content = content,
     )
 }
+
+@Composable
+fun BitChordTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) = AppleMusicTheme(darkTheme = darkTheme, content = content)
 
 /**
  * Draws the status and navigation bar glyphs dark or light.

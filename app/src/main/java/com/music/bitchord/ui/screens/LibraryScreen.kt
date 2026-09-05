@@ -59,6 +59,7 @@ import com.music.bitchord.data.model.LibraryPage
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.model.UiState
 import com.music.bitchord.data.settings.AppSettings
+import com.music.bitchord.data.settings.LibrarySort
 import com.music.bitchord.download.Downloads
 import com.music.bitchord.download.SavedCollection
 import com.music.bitchord.ui.icons.BitChordIcons
@@ -141,6 +142,7 @@ fun LibraryScreen(
     downloadedPlaylists: List<SavedCollection> = emptyList(),
 ) {
     val pinnedPlaylists by AppSettings.pinnedPlaylists.collectAsStateWithLifecycle()
+    val onDevice = stringResource(R.string.on_device)
     PullToRefresh(
         refreshing = refreshing,
         onRefresh = onRefresh,
@@ -206,9 +208,9 @@ fun LibraryScreen(
             // it the page still has to say the feature exists, or the only way
             // to discover it is to have already used it.
             item(key = "replay") { ReplayBanner(replayCard, onOpenReplay) }
-            item(key = "shelf:$ON_DEVICE") {
+            item(key = "shelf:$onDevice") {
                 val onDeviceShelf = HomeShelf(
-                    title = ON_DEVICE,
+                    title = onDevice,
                     items = listOf(
                         ShelfItem(
                             title = stringResource(R.string.downloads),
@@ -235,7 +237,9 @@ fun LibraryScreen(
                             // make that header read "Downloaded playlist" over
                             // "PLAYLIST • 12 SONGS", and the shelf this card
                             // is on already says where it lives.
-                            subtitle = playlist.subtitle.ifBlank { "Downloaded playlist" },
+                            subtitle = playlist.subtitle.ifBlank {
+                                stringResource(R.string.downloaded_playlist)
+                            },
                             thumbnailUrl = playlist.thumbnailUrl,
                             videoId = null,
                             browseId = Downloads.pageIdFor(playlist.id),
@@ -263,7 +267,7 @@ fun LibraryScreen(
             when (state) {
                 is UiState.Loading -> librarySkeleton()
                 is UiState.Error -> item {
-                    MessageState(state.message, actionLabel = "Retry", onAction = onRetry)
+                    MessageState(state.message, actionLabel = stringResource(R.string.retry), onAction = onRetry)
                 }
                 is UiState.Success -> {
                     // A fresh account has no Playlists shelf at all, and that
@@ -383,7 +387,7 @@ private fun ReplayBanner(card: ReplayHeroCard?, onClick: () -> Unit) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = "Your Replay",
+                    text = stringResource(R.string.your_replay),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                 )
@@ -391,7 +395,7 @@ private fun ReplayBanner(card: ReplayHeroCard?, onClick: () -> Unit) {
                     // The numbers when there are any, because "5,231 minutes" is
                     // a reason to tap and a description of the feature is not.
                     text = card?.let { "${it.value} ${it.label.lowercase(Locale.ROOT)} · ${it.detail}" }
-                        ?: "Top songs, artists, albums and genres — counted on this device",
+                        ?: stringResource(R.string.replay_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.82f),
                     maxLines = 2,
@@ -432,7 +436,7 @@ private fun PlaylistShelf(
         leadingCard = {
             NewShelfCard(
                 icon = BitChordIcons.Plus,
-                label = "New playlist",
+                label = stringResource(R.string.new_playlist),
                 subtitle = stringResource(R.string.saved_to_youtube_music),
                 onClick = onNewPlaylist,
             )
@@ -506,7 +510,11 @@ fun LibraryGridPage(
     // pin toggled from this page's own long-press menu must move the card
     // immediately rather than waiting for the row underneath to be revisited.
     val pinnedPlaylists by AppSettings.pinnedPlaylists.collectAsStateWithLifecycle()
-    val sortedShelf = shelf.pinnedFirst(pinnedPlaylists)
+    val librarySort by AppSettings.librarySort.collectAsStateWithLifecycle()
+    // Pinning wins over the default order, but an explicit sort is a stronger,
+    // more deliberate signal than a pin and is left to reorder the whole grid,
+    // pinned cards included.
+    val sortedShelf = shelf.pinnedFirst(pinnedPlaylists).sortedForLibrary(librarySort)
     BoxWithConstraints(modifier.fillMaxSize()) {
         val grid = libraryGrid(maxWidth - PAGE_GUTTER * 2)
         LazyVerticalGrid(
@@ -521,7 +529,7 @@ fun LibraryGridPage(
                 item(key = "leading") {
                     NewShelfCard(
                         icon = BitChordIcons.Plus,
-                        label = "New playlist",
+                        label = stringResource(R.string.new_playlist),
                         subtitle = stringResource(R.string.saved_to_youtube_music),
                         onClick = onNewPlaylist,
                         modifier = Modifier.fillMaxWidth(),
@@ -556,6 +564,18 @@ private fun HomeShelf.pinnedFirst(pinned: List<String>): HomeShelf {
     if (pinnedItems.isEmpty()) return this
     val pinnedSet = pinnedItems.toSet()
     return copy(items = pinnedItems + items.filter { it !in pinnedSet })
+}
+
+/**
+ * A card's title is all a Library shelf carries, so [LibrarySort.DEFAULT] is
+ * the only option that isn't alphabetical — everything else sorts on it.
+ */
+private fun HomeShelf.sortedForLibrary(sort: LibrarySort): HomeShelf = when (sort) {
+    LibrarySort.DEFAULT -> this
+    LibrarySort.TITLE_ASC -> copy(items = items.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }))
+    LibrarySort.TITLE_DESC -> copy(
+        items = items.sortedWith(compareByDescending(String.CASE_INSENSITIVE_ORDER) { it.title }),
+    )
 }
 
 /** The library feed whose cards are the account's own — see [PlaylistShelf]. */
