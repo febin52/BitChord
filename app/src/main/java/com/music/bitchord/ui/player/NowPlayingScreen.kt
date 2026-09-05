@@ -2108,14 +2108,14 @@ fun NowPlayingScreen(
                 // source credit pill in the middle, close circle on the right.
                 // The row stretches edge-to-edge so there is no dangling gap
                 // on either side — the pill just sits between the two icons.
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
                     if (showLyricsLogsEnabled) {
                         Box(
                             modifier = Modifier
+                                .align(Alignment.CenterStart)
                                 .size(34.dp)
                                 .clip(CircleShape)
                                 .background(if (lyricsLogsOpen) Color.White.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.10f))
@@ -2136,9 +2136,9 @@ fun NowPlayingScreen(
                             )
                         }
                     }
-                    Spacer(Modifier.weight(1f))
                     Box(
                         modifier = Modifier
+                            .align(Alignment.Center)
                             .size(34.dp)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.10f))
