@@ -4420,16 +4420,28 @@ class PlaybackService : MediaLibraryService() {
         override fun seekToPreviousMediaItem() {
             crossfade.onSkipRequested()
             wrappedPlayer.seekToPrevious()
+            if (wrappedPlayer.playbackState == Player.STATE_IDLE) {
+                wrappedPlayer.prepare()
+            }
+            wrappedPlayer.play()
         }
 
         override fun seekToNextMediaItem() {
             crossfade.onSkipRequested()
             wrappedPlayer.seekToNextMediaItem()
+            if (wrappedPlayer.playbackState == Player.STATE_IDLE) {
+                wrappedPlayer.prepare()
+            }
+            wrappedPlayer.play()
         }
 
         override fun seekToNext() {
             crossfade.onSkipRequested()
             wrappedPlayer.seekToNext()
+            if (wrappedPlayer.playbackState == Player.STATE_IDLE) {
+                wrappedPlayer.prepare()
+            }
+            wrappedPlayer.play()
         }
     }
 
