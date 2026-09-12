@@ -281,7 +281,7 @@ fun CanvasArtworkPlayer(
 
     val alpha by animateFloatAsState(
         targetValue = if (rendered) 1f else 0f,
-        animationSpec = tween(durationMillis = 320),
+        animationSpec = tween(durationMillis = 500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
         label = "canvasAlpha",
     )
 

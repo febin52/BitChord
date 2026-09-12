@@ -180,6 +180,7 @@ import androidx.media3.common.Player
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.music.bitchord.ui.rememberIsForeground
 import com.music.bitchord.ui.components.thumbnailBorder
 import com.music.bitchord.ui.components.optimizedHazeEffect
@@ -1015,6 +1016,7 @@ fun NowPlayingScreen(
         ImageRequest.Builder(context)
             .data(targetData)
             .size(ART_PX)
+            .crossfade(400)
             // What makes a retry a new request as far as Coil's model comparison
             // is concerned. Only from the second go onwards, so the ordinary
             // request stays byte-identical to the one the mesh and the palette

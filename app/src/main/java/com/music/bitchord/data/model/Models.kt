@@ -143,13 +143,40 @@ fun String?.durationMillis(): Long {
 
 /** As [Song.artworkAt], for artwork that isn't a track's. */
 fun String?.artworkAt(px: Int): String? {
-    val url = this ?: return null
+    val url = this?.trim() ?: return null
+    if (url.isBlank()) return null
+
+    // YouTube / Google UserContent URLs (lh3.googleusercontent.com, yt3.ggpht.com)
+    if (url.contains("googleusercontent.com") || url.contains("ggpht.com")) {
+        if (url.contains(SIZE_HINT)) {
+            return url.replace(SIZE_HINT, "w$px-h$px")
+        }
+        if (url.contains(SIZE_HINT_S)) {
+            return url.replace(SIZE_HINT_S, "=w$px-h$px-l90-rj")
+        }
+        // If it's a bare googleusercontent image without size parameters, append high-res square spec
+        if (url.contains("=w") || url.contains("=s")) {
+            return url.replace(Regex("""=(?:w\d+-h\d+|s\d+)[^/]*"""), "=w$px-h$px-l90-rj")
+        }
+    }
+
     if (url.contains(SIZE_HINT)) {
         return url.replace(SIZE_HINT, "w$px-h$px")
     }
     if (url.contains(SIZE_HINT_S)) {
         return url.replace(SIZE_HINT_S, "=s$px")
     }
+
+    // YouTube standard video thumbnail URLs (i.ytimg.com / img.youtube.com)
+    // Extract videoId and upgrade to maxresdefault or hqdefault for cleaner rendering
+    if (url.contains("i.ytimg.com") || url.contains("img.youtube.com")) {
+        val match = Regex("""/vi(?:_webp)?/([a-zA-Z0-9_-]{11})/""").find(url)
+        if (match != null) {
+            val videoId = match.groupValues[1]
+            return "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
+        }
+    }
+
     return url
 }
 
